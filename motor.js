@@ -288,7 +288,7 @@
         if (!j || c.parcela === null) continue;
         for (let i = mIdx(j.ini); i <= mIdx(j.fim); i++) linhas.push({ comp: mStr(i), data: null, valor: r2(c.parcela), contratoId: c.id, estimado: true });
       }
-      avisos.push({ nivel: "alerta", texto: "Sem HISCRE: os descontos foram ESTIMADOS pelas datas do HISCON (um por mês na janela de cada contrato). Para a inicial, junte o Histórico de Créditos e marque os valores como estimados se seguir assim." });
+      avisos.push({ nivel: "alerta", texto: "Sem HISCRE: os descontos foram estimados pelas datas do HISCON (um por mês na janela de cada contrato). Para a inicial, junte o Histórico de Créditos e marque os valores como estimados se seguir assim." });
     }
     linhas.sort((a, b) => a.comp.localeCompare(b.comp));
     return { linhas, avisos };
