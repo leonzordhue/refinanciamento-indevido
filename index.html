@@ -1,0 +1,1033 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Refinanciamento Indevido · Luís Albert Advocacia</title>
+<meta name="description" content="Calculadora de refinanciamento indevido de consignado do INSS: leitura do HISCON e do HISCRE, reconstrução da cadeia de contratos, restituição em dobro atualizada e valor da causa.">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%230B4A44'/%3E%3Ctext x='32' y='43' font-family='Georgia,serif' font-size='30' text-anchor='middle' fill='%23E8CB6E'%3ELA%3C/text%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600;9..40,700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --teal:#0B4A44; --teal-mid:#145E58; --teal-light:#1C7A72; --teal-bg:#EBF5F4; --teal-brd:#A8D4D0;
+  --gold:#C9A93E; --gold-deep:#735C14; --gold-light:#E8CB6E; --gold-bg:#FBF5E0;
+  --bg:#F4F6F8; --card:#FFFFFF; --line:#DDE3EC; --line-soft:#EAEFF4;
+  --muted:#5B6B7C; --text:#162030; --text-mid:#3D4F63;
+  --ok:#1A6B48; --ok-bg:#E8F5EE; --ok-brd:#9FD3B7;
+  --warn:#8A6100; --warn-bg:#FFF6DC; --warn-brd:#EBCB7A;
+  --err:#A3261B; --err-bg:#FDECEA; --err-brd:#F0B4AE;
+  --serif:"Cormorant Garamond",Georgia,"Times New Roman",serif;
+  --sans:"DM Sans",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+  --r:14px; --r-sm:9px;
+  --sh:0 1px 2px rgba(22,32,48,.05),0 6px 24px -12px rgba(22,32,48,.18);
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+@media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}*{transition:none!important;animation:none!important}}
+body{margin:0;font:15px/1.55 var(--sans);color:var(--text);background:var(--bg);-webkit-font-smoothing:antialiased}
+.num,td.v,th.v,.kpi b{font-variant-numeric:tabular-nums}
+a{color:var(--teal-light)}
+:focus-visible{outline:3px solid var(--gold);outline-offset:2px;border-radius:6px}
+.sr{position:absolute!important;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+.pular{position:absolute;left:-999px;top:8px;background:var(--gold);color:var(--text);padding:8px 14px;border-radius:8px;z-index:99}
+.pular:focus{left:12px}
+
+/* ---------- topo */
+header.topo{background:var(--teal);color:#fff;position:relative;overflow:hidden}
+header.topo::after{content:"";position:absolute;inset:auto -10% -60% auto;width:520px;height:520px;border-radius:50%;
+  background:radial-gradient(closest-side,rgba(232,203,110,.16),transparent 70%);pointer-events:none}
+.topo-in{max-width:1320px;margin:0 auto;padding:18px 28px 0;display:flex;align-items:center;gap:16px;flex-wrap:wrap}
+.marca{display:flex;align-items:center;gap:14px;text-decoration:none;color:inherit}
+.selo{width:46px;height:46px;border-radius:12px;border:1.5px solid var(--gold-light);display:grid;place-items:center;
+  font:600 22px/1 var(--serif);color:var(--gold-light);letter-spacing:.5px}
+.marca small{display:block;font:600 12px/1.2 var(--sans);letter-spacing:.14em;text-transform:uppercase;color:var(--gold-light)}
+.marca strong{font:600 21px/1.15 var(--serif);letter-spacing:.2px}
+.topo .acoes{margin-left:auto;display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.seg{display:inline-flex;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.2);border-radius:999px;padding:3px}
+.seg button{all:unset;cursor:pointer;padding:6px 14px;border-radius:999px;font:600 13px var(--sans);color:#E6F1EF}
+.seg button[aria-pressed="true"]{background:var(--gold-light);color:var(--teal)}
+.seg button:focus-visible{outline:3px solid var(--gold-light)}
+.btn-topo{all:unset;cursor:pointer;padding:8px 14px;border-radius:999px;font:600 13px var(--sans);color:#fff;border:1px solid rgba(255,255,255,.28)}
+.btn-topo:hover{background:rgba(255,255,255,.1)}
+.hero{max-width:1320px;margin:0 auto;padding:26px 28px 30px;display:grid;grid-template-columns:1.25fr .75fr;gap:28px;align-items:end;position:relative;z-index:1}
+.hero h1{font:600 clamp(28px,3.4vw,42px)/1.08 var(--serif);margin:0 0 10px;letter-spacing:-.2px}
+.hero h1 em{font-style:italic;color:var(--gold-light)}
+.hero p{margin:0;color:#CFE3E0;max-width:62ch}
+.privado{display:flex;gap:12px;align-items:flex-start;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.16);
+  border-radius:var(--r);padding:14px 16px;font-size:13.5px;color:#E2EFED}
+.privado svg{flex:0 0 22px;color:var(--gold-light);margin-top:1px}
+
+/* ---------- passos */
+nav.passos{position:sticky;top:0;z-index:20;background:rgba(244,246,248,.92);backdrop-filter:saturate(1.4) blur(8px);border-bottom:1px solid var(--line)}
+.passos ol{max-width:1320px;margin:0 auto;padding:0 28px;list-style:none;display:flex;gap:4px;overflow-x:auto}
+.passos li button{all:unset;cursor:pointer;display:flex;align-items:center;gap:9px;padding:14px 14px 12px;border-bottom:3px solid transparent;
+  font:600 14px var(--sans);color:var(--muted);white-space:nowrap}
+.passos li button .n{width:24px;height:24px;border-radius:50%;display:grid;place-items:center;font-size:12px;background:var(--line-soft);color:var(--text-mid)}
+.passos li button[aria-selected="true"]{color:var(--teal);border-color:var(--gold)}
+.passos li button[aria-selected="true"] .n{background:var(--teal);color:#fff}
+.passos li button.feito .n{background:var(--ok-bg);color:var(--ok)}
+.passos li button:hover{color:var(--teal)}
+
+/* ---------- grade */
+main{max-width:1320px;margin:0 auto;padding:26px 28px 80px;display:grid;grid-template-columns:minmax(0,1fr) 340px;gap:26px;align-items:start}
+section.painel{display:none}
+section.painel:focus{outline:none}
+section.painel.ativo{display:block;animation:entra .25s ease}
+@keyframes entra{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:none}}
+.titulo-sec{display:flex;align-items:baseline;gap:14px;margin:2px 0 16px;flex-wrap:wrap}
+.titulo-sec h2{font:600 30px/1.1 var(--serif);margin:0;color:var(--teal)}
+.titulo-sec p{margin:0;color:var(--muted);font-size:14px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:var(--r);box-shadow:var(--sh);padding:22px;margin-bottom:18px}
+.card h3{font:600 20px/1.2 var(--serif);margin:0 0 4px;color:var(--text)}
+.card .sub{color:var(--muted);font-size:13.5px;margin:0 0 14px}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:18px}
+.grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+.grid4{display:grid;grid-template-columns:repeat(4,1fr);gap:14px}
+
+/* ---------- upload */
+.drop{position:relative;border:1.5px dashed var(--teal-brd);background:var(--teal-bg);border-radius:var(--r);padding:22px;min-height:178px;
+  display:flex;flex-direction:column;gap:8px;justify-content:center;transition:border-color .15s,background .15s}
+.drop.sobre{border-color:var(--teal);background:#DDEFED}
+.drop.ok{border-style:solid;border-color:var(--ok-brd);background:var(--ok-bg)}
+.drop input[type=file]{position:absolute;inset:0;opacity:0;cursor:pointer}
+.drop .rot{display:flex;align-items:center;gap:10px;font:600 16px var(--sans);color:var(--teal)}
+.drop .rot .tag{font:700 12px var(--sans);letter-spacing:.1em;text-transform:uppercase;padding:3px 8px;border-radius:999px;background:var(--teal);color:#fff}
+.drop .rot .tag.op{background:var(--gold-bg);color:var(--gold-deep);border:1px solid var(--warn-brd)}
+.drop p{margin:0;color:var(--text-mid);font-size:13.5px}
+.drop .estado{font-size:13px;color:var(--ok);font-weight:600}
+.barra{height:6px;border-radius:99px;background:rgba(11,74,68,.12);overflow:hidden;margin-top:6px;display:none}
+.barra i{display:block;height:100%;width:0;background:linear-gradient(90deg,var(--teal-light),var(--gold));transition:width .2s}
+.ou{display:flex;align-items:center;gap:12px;color:var(--muted);font-size:13px;margin:18px 0 12px}
+.ou::before,.ou::after{content:"";flex:1;height:1px;background:var(--line)}
+
+/* ---------- formulários */
+label.campo{display:flex;flex-direction:column;gap:5px;font:600 12.5px var(--sans);color:var(--text-mid)}
+label.campo span.dica{font-weight:400;color:var(--muted);font-size:12px;line-height:1.4}
+input,select,textarea{font:inherit;color:var(--text);background:#fff;border:1px solid var(--line);border-radius:var(--r-sm);padding:9px 11px;min-width:0}
+input:hover,select:hover,textarea:hover{border-color:#C6D0DC}
+input:focus,select:focus,textarea:focus{outline:none;border-color:var(--teal-light);box-shadow:0 0 0 3px rgba(28,122,114,.18)}
+textarea{width:100%;min-height:130px;font:13px/1.45 ui-monospace,SFMono-Regular,Consolas,monospace}
+.opcoes{display:grid;gap:8px}
+.opcao{display:flex;gap:10px;align-items:flex-start;border:1px solid var(--line);border-radius:var(--r-sm);padding:11px 12px;cursor:pointer;background:#fff}
+.opcao:hover{border-color:var(--teal-brd)}
+.opcao:has(input:checked){border-color:var(--teal-light);background:var(--teal-bg);box-shadow:inset 3px 0 0 var(--teal)}
+.opcao input{margin-top:3px;accent-color:var(--teal)}
+.opcao b{display:block;font-size:14px}
+.opcao small{display:block;color:var(--muted);font-size:12.5px;line-height:1.4}
+.fund{display:inline-block;margin-top:4px;font:600 12px var(--sans);color:var(--gold-deep);background:var(--gold-bg);border:1px solid #F0DFA6;border-radius:6px;padding:1px 6px}
+
+/* ---------- botões */
+.btn{all:unset;box-sizing:border-box;cursor:pointer;display:inline-flex;align-items:center;gap:8px;padding:10px 16px;border-radius:10px;
+  font:600 14px var(--sans);background:var(--teal);color:#fff;transition:background .15s,transform .05s}
+.btn:hover{background:var(--teal-mid)}
+.btn:active{transform:translateY(1px)}
+.btn.sec{background:#fff;color:var(--teal);border:1px solid var(--teal-brd)}
+.btn.sec:hover{background:var(--teal-bg)}
+.btn.ouro{background:var(--gold);color:#1F1A08}
+.btn.ouro:hover{background:var(--gold-light)}
+.btn.peq{padding:7px 12px;font-size:13px;border-radius:8px}
+.btn.ghost{background:transparent;color:var(--muted);padding:6px 8px}
+.btn.ghost:hover{color:var(--err);background:var(--err-bg)}
+.btn:focus-visible{outline:3px solid var(--gold);outline-offset:2px}
+.linha-botoes{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+.prox{display:flex;justify-content:space-between;margin-top:8px}
+
+/* ---------- tabelas */
+.tabela-wrap{overflow:auto;border:1px solid var(--line);border-radius:var(--r-sm);max-width:100%}
+table{border-collapse:collapse;width:100%;font-size:13.5px}
+caption{text-align:left;padding:0 0 8px;font:600 13px var(--sans);color:var(--text-mid)}
+th{background:#F7F9FB;color:var(--text-mid);font:600 12px var(--sans);letter-spacing:.04em;text-transform:uppercase;text-align:left;
+  padding:10px 10px;border-bottom:1px solid var(--line);white-space:nowrap;position:sticky;top:0}
+td{padding:8px 10px;border-bottom:1px solid var(--line-soft);vertical-align:middle}
+tr:last-child td{border-bottom:0}
+td.v,th.v{text-align:right;white-space:nowrap}
+tbody tr:hover td{background:#FAFCFD}
+tfoot td{font-weight:700;background:var(--gold-bg);border-top:1px solid #F0DFA6}
+table.edit td{padding:5px 6px}
+table.edit input,table.edit select{padding:6px 7px;font-size:13px;border-radius:7px;width:100%}
+table.edit input.w-num{width:84px}
+table.edit input.w-mon{width:108px;text-align:right}
+table.edit input.w-ctr{width:118px;font-family:ui-monospace,Consolas,monospace}
+.chip{display:inline-flex;align-items:center;gap:5px;font:600 12px var(--sans);padding:2px 8px;border-radius:999px;white-space:nowrap}
+.chip.imp{background:var(--err-bg);color:var(--err)}
+.chip.nao{background:var(--line-soft);color:var(--text-mid)}
+.chip.ok{background:var(--ok-bg);color:var(--ok)}
+.chip.av{background:var(--warn-bg);color:var(--warn)}
+.chip.est{background:var(--gold-bg);color:var(--gold-deep)}
+.mono{font-family:ui-monospace,SFMono-Regular,Consolas,monospace;font-size:12.5px}
+tr.presc td{color:#66727F;text-decoration:line-through}
+tr.dev td{color:var(--muted)}
+
+/* ---------- cadeia */
+.cadeia{margin:6px 0 4px}
+.cadeia h4{font:600 13px var(--sans);letter-spacing:.06em;text-transform:uppercase;color:var(--muted);margin:0 0 10px}
+.elos{display:flex;align-items:stretch;gap:0;overflow-x:auto;padding:4px 2px 12px}
+.elo{min-width:210px;max-width:240px;border:1px solid var(--line);border-radius:12px;background:#fff;padding:12px 14px;position:relative;box-shadow:var(--sh)}
+.elo.imp{border-color:#EFC3BE;box-shadow:inset 0 3px 0 #D9534F,var(--sh)}
+.elo.zero{box-shadow:inset 0 3px 0 var(--teal-light),var(--sh)}
+.elo .r{font:700 12px var(--sans);color:var(--muted);letter-spacing:.06em}
+.elo .c{font:600 15px ui-monospace,Consolas,monospace;margin:2px 0 6px;color:var(--text)}
+.elo dl{margin:0;display:grid;grid-template-columns:auto 1fr;gap:2px 10px;font-size:12.5px}
+.elo dt{color:var(--muted)} .elo dd{margin:0;text-align:right;font-variant-numeric:tabular-nums}
+.seta{flex:0 0 54px;display:flex;flex-direction:column;align-items:center;justify-content:center;color:var(--gold-deep);font:600 12px/1.2 var(--sans);text-align:center}
+.seta svg{width:40px;height:16px}
+
+/* ---------- resultado */
+.kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:18px}
+.kpi{background:#fff;border:1px solid var(--line);border-radius:var(--r);padding:16px 18px;box-shadow:var(--sh)}
+.kpi span{display:block;font:600 12px var(--sans);letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+.kpi b{display:block;font:600 30px/1.1 var(--serif);color:var(--teal);margin:6px 0 2px}
+.kpi small{color:var(--muted);font-size:12.5px}
+.kpi.destaque{background:var(--teal);border-color:var(--teal);color:#fff;position:relative;overflow:hidden}
+.kpi.destaque::after{content:"";position:absolute;right:-30px;top:-30px;width:120px;height:120px;border-radius:50%;background:radial-gradient(closest-side,rgba(232,203,110,.35),transparent)}
+.kpi.destaque span,.kpi.destaque small{color:#CFE3E0}
+.kpi.destaque b{color:var(--gold-light)}
+.grafico{width:100%;height:auto;display:block}
+.legenda{display:flex;gap:16px;flex-wrap:wrap;font-size:12.5px;color:var(--text-mid);margin-top:8px}
+.legenda i{display:inline-block;width:12px;height:12px;border-radius:3px;vertical-align:-2px;margin-right:6px}
+details.memoria summary{cursor:pointer;font:600 14px var(--sans);color:var(--teal);padding:4px 0}
+.fundamentos{display:grid;grid-template-columns:1fr 1fr;gap:18px}
+.fundamentos h4{font:600 16px var(--serif);margin:0 0 8px;color:var(--teal)}
+.fundamentos ul{margin:0;padding-left:18px;font-size:13.5px;color:var(--text-mid)}
+.fundamentos li{margin-bottom:6px}
+.fundamentos li b{color:var(--text)}
+.conferir{font:600 12px var(--sans);color:var(--warn);background:var(--warn-bg);border-radius:5px;padding:0 5px;margin-left:4px;white-space:nowrap}
+pre.tokens{background:#0F2724;color:#DDEEEB;border-radius:var(--r-sm);padding:14px 16px;font:12.5px/1.6 ui-monospace,Consolas,monospace;overflow:auto;max-height:340px;margin:0}
+pre.tokens b{color:var(--gold-light);font-weight:600}
+
+/* ---------- lateral */
+aside.resumo{position:sticky;top:72px;display:flex;flex-direction:column;gap:14px}
+.res-card{background:var(--card);border:1px solid var(--line);border-radius:var(--r);box-shadow:var(--sh);overflow:hidden}
+.res-top{background:linear-gradient(160deg,var(--teal),#0E5B53);color:#fff;padding:18px 20px}
+.res-top span{font:600 12px var(--sans);letter-spacing:.14em;text-transform:uppercase;color:var(--gold-light)}
+.res-top b{display:block;font:600 36px/1.05 var(--serif);margin:6px 0 4px;font-variant-numeric:tabular-nums}
+.res-top small{color:#CFE3E0;font-size:12.5px}
+.res-lin{display:flex;justify-content:space-between;gap:10px;padding:10px 20px;border-top:1px solid var(--line-soft);font-size:13.5px}
+.res-lin span{color:var(--muted)}
+.res-lin b{font-variant-numeric:tabular-nums}
+.avisos{display:flex;flex-direction:column;gap:8px}
+.aviso{display:flex;gap:10px;padding:10px 12px;border-radius:10px;font-size:13px;line-height:1.45;border:1px solid}
+.aviso svg{flex:0 0 16px;margin-top:2px}
+.aviso.erro{background:var(--err-bg);border-color:var(--err-brd);color:#6B1A12}
+.aviso.alerta{background:var(--warn-bg);border-color:var(--warn-brd);color:#5E4300}
+.aviso.info{background:#F1F6FA;border-color:#D4E1EC;color:var(--text-mid)}
+.indices{font-size:12px;color:var(--muted);padding:0 4px}
+.vazio{padding:28px;text-align:center;color:var(--muted);border:1px dashed var(--line);border-radius:var(--r);background:#FAFBFC}
+.vazio b{display:block;font:600 20px var(--serif);color:var(--text);margin-bottom:4px}
+
+dialog{border:0;border-radius:var(--r);padding:0;max-width:760px;width:calc(100% - 32px);box-shadow:0 30px 80px -20px rgba(0,0,0,.45)}
+dialog::backdrop{background:rgba(10,28,26,.55)}
+dialog .dlg{padding:22px}
+dialog h3{font:600 22px var(--serif);margin:0 0 6px;color:var(--teal)}
+
+footer{max-width:1320px;margin:0 auto;padding:0 28px 40px;color:var(--muted);font-size:12.5px}
+
+@media (max-width:1080px){main{grid-template-columns:1fr}aside.resumo{position:static;order:-1}.kpis{grid-template-columns:1fr 1fr}.hero{grid-template-columns:1fr}}
+@media (max-width:720px){.grid2,.grid3,.grid4,.fundamentos{grid-template-columns:1fr}.topo-in,.hero,main,.passos ol{padding-left:16px;padding-right:16px}.kpi b{font-size:24px}}
+
+/* ---------- impressão: só a memória de cálculo */
+.so-impressao{display:none}
+@media print{
+  @page{size:A4;margin:14mm 12mm}
+  body{background:#fff;font-size:12px}
+  header.topo,nav.passos,aside.resumo,footer,.nao-imprimir,section.painel:not(#p-resultado){display:none!important}
+  main{display:block;padding:0;max-width:none}
+  section#p-resultado{display:block!important}
+  .so-impressao{display:block}
+  .card,.kpi{box-shadow:none;break-inside:avoid}
+  .kpi.destaque{background:#fff;color:var(--text);border:2px solid var(--teal)}
+  .kpi.destaque b{color:var(--teal)} .kpi.destaque span,.kpi.destaque small{color:var(--muted)}
+  details.memoria{display:block} details.memoria>summary{display:none}
+  th{position:static}
+  .tabela-wrap{overflow:visible;border:0}
+  table{font-size:10px}
+  .kpis{grid-template-columns:repeat(4,1fr)}
+}
+</style>
+</head>
+<body>
+<a class="pular" href="#conteudo">Pular para o conteúdo</a>
+
+<header class="topo">
+  <div class="topo-in">
+    <a class="marca" href="./" aria-label="Luís Albert Advocacia, início">
+      <span class="selo" aria-hidden="true">LA</span>
+      <span><small>Luís Albert Advocacia</small><strong>Refinanciamento Indevido</strong></span>
+    </a>
+    <div class="acoes">
+      <div class="seg" role="group" aria-label="Tribunal">
+        <button type="button" data-trib="TJAM" aria-pressed="true">Amazonas · TJAM</button>
+        <button type="button" data-trib="TJRJ" aria-pressed="false">Rio de Janeiro · TJRJ</button>
+      </div>
+      <button type="button" class="btn-topo" id="b-exemplo">Ver exemplo</button>
+      <button type="button" class="btn-topo" id="b-abrir">Abrir caso</button>
+      <button type="button" class="btn-topo" id="b-novo">Novo caso</button>
+      <input type="file" id="f-caso" accept=".json,application/json" hidden>
+    </div>
+  </div>
+  <div class="hero">
+    <div>
+      <h1>Da cadeia de refinanciamentos ao <em>valor da causa</em>, com a conta aberta.</h1>
+      <p>Envie o HISCON e o Histórico de Créditos do INSS ou digite os contratos. A calculadora liga cada refinanciamento ao contrato que ele quitou, separa o que já era devido do que foi acrescido e calcula a restituição em dobro atualizada, mês a mês.</p>
+    </div>
+    <div class="privado">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M12 3 4 6v6c0 4.4 3.4 8.3 8 9 4.6-.7 8-4.6 8-9V6l-8-3Z"/><path d="m9 12 2 2 4-4"/></svg>
+      <span><b>Os documentos não saem deste computador.</b> A leitura do PDF e o OCR rodam no navegador; nada é enviado a servidor. O caso fica salvo só neste navegador até você clicar em “Novo caso”.</span>
+    </div>
+  </div>
+</header>
+
+<nav class="passos" aria-label="Etapas">
+  <ol role="tablist">
+    <li><button role="tab" type="button" id="t-documentos" aria-controls="p-documentos" aria-selected="true"><span class="n">1</span>Documentos</button></li>
+    <li><button role="tab" type="button" id="t-contratos" aria-controls="p-contratos" aria-selected="false"><span class="n">2</span>Contratos e cadeia</button></li>
+    <li><button role="tab" type="button" id="t-descontos" aria-controls="p-descontos" aria-selected="false"><span class="n">3</span>Descontos</button></li>
+    <li><button role="tab" type="button" id="t-parametros" aria-controls="p-parametros" aria-selected="false"><span class="n">4</span>Parâmetros</button></li>
+    <li><button role="tab" type="button" id="t-resultado" aria-controls="p-resultado" aria-selected="false"><span class="n">5</span>Resultado</button></li>
+  </ol>
+</nav>
+
+<main id="conteudo">
+<div>
+  <!-- ======================= 1. DOCUMENTOS -->
+  <section class="painel ativo" id="p-documentos" role="tabpanel" aria-labelledby="t-documentos" tabindex="-1">
+    <div class="titulo-sec"><h2>Documentos do cliente</h2><p>PDF com texto ou escaneado. Se for escaneado, o OCR em português roda aqui mesmo.</p></div>
+    <div class="grid2">
+      <div class="drop" id="d-hiscon">
+        <input type="file" id="f-hiscon" accept="application/pdf,.pdf" aria-describedby="d-hiscon-desc">
+        <div class="rot"><span class="tag">Obrigatório</span>HISCON</div>
+        <p id="d-hiscon-desc">Histórico de Empréstimo Consignado (Meu INSS). Arraste o PDF aqui ou clique.</p>
+        <div class="estado" id="e-hiscon" aria-live="polite"></div>
+        <div class="barra" id="b-hiscon"><i></i></div>
+      </div>
+      <div class="drop" id="d-hiscre">
+        <input type="file" id="f-hiscre" accept="application/pdf,.pdf" aria-describedby="d-hiscre-desc">
+        <div class="rot"><span class="tag op">Recomendado</span>HISCRE</div>
+        <p id="d-hiscre-desc">Histórico de Créditos (extrato de pagamento). Dá o valor real de cada desconto; sem ele, a conta é estimada.</p>
+        <div class="estado" id="e-hiscre" aria-live="polite"></div>
+        <div class="barra" id="b-hiscre"><i></i></div>
+      </div>
+    </div>
+    <div class="ou">ou</div>
+    <div class="linha-botoes">
+      <button type="button" class="btn sec" id="b-colar">Colar tabela do HISCON (Excel)</button>
+      <button type="button" class="btn sec" id="b-manual">Digitar os contratos</button>
+    </div>
+
+    <div class="card" style="margin-top:22px">
+      <h3>Benefício</h3>
+      <p class="sub">Vem da página 1 e 2 do HISCON. Confira.</p>
+      <div class="grid4">
+        <label class="campo">Nome do titular<input id="i-nome" autocomplete="off"></label>
+        <label class="campo">Nº do benefício (NB)<input id="i-nb" autocomplete="off" inputmode="numeric"></label>
+        <label class="campo">Espécie<input id="i-especie" autocomplete="off"></label>
+        <label class="campo">Base de cálculo (R$)<input id="i-base" inputmode="decimal" placeholder="0,00"><span class="dica">Para o % do benefício comprometido.</span></label>
+      </div>
+    </div>
+    <div class="prox"><span></span><button type="button" class="btn" data-ir="contratos">Conferir contratos →</button></div>
+  </section>
+
+  <!-- ======================= 2. CONTRATOS -->
+  <section class="painel" id="p-contratos" role="tabpanel" aria-labelledby="t-contratos" tabindex="-1">
+    <div class="titulo-sec"><h2>Contratos e cadeia</h2><p>Confira cada linha com o HISCON. A cadeia é refeita a cada alteração.</p></div>
+    <div class="card">
+      <div class="linha-botoes" style="justify-content:space-between;margin-bottom:12px">
+        <label class="campo" style="flex-direction:row;align-items:center;gap:10px">Banco réu
+          <select id="i-reu" aria-describedby="reu-dica"></select></label>
+        <span class="dica" id="reu-dica" style="color:var(--muted);font-size:12.5px">Só se impugna contrato do banco réu. Outros bancos viram sugestão de ação autônoma.</span>
+        <button type="button" class="btn peq sec" id="b-add">+ Contrato</button>
+      </div>
+      <div class="tabela-wrap">
+        <table class="edit" id="tb-contratos">
+          <caption class="sr">Contratos do HISCON, editáveis</caption>
+          <thead><tr>
+            <th>Contrato</th><th>Banco</th><th>Situação</th><th>Origem da averbação</th><th>Inclusão</th><th>Início desc.</th><th>Fim desc.</th>
+            <th class="v">Qtde</th><th class="v">Parcela</th><th class="v">Emprestado</th><th class="v">Liberado</th><th class="v">Valor pago</th>
+            <th>Exclusão</th><th>Origem da exclusão</th><th title="O cliente reconhece este contrato">Reconhece</th><th><span class="sr">Remover</span></th>
+          </tr></thead>
+          <tbody></tbody>
+        </table>
+      </div>
+    </div>
+    <div class="card">
+      <h3>Cadeias reconstruídas</h3>
+      <p class="sub">Regra: mesmo banco; o contrato anterior foi excluído “por refinanciamento” até 2 dias da inclusão do novo. Empate: parcela igual, depois numeração mais próxima.</p>
+      <div id="cadeias"></div>
+    </div>
+    <div class="prox"><button type="button" class="btn sec" data-ir="documentos">← Documentos</button><button type="button" class="btn" data-ir="descontos">Descontos →</button></div>
+  </section>
+
+  <!-- ======================= 3. DESCONTOS -->
+  <section class="painel" id="p-descontos" role="tabpanel" aria-labelledby="t-descontos" tabindex="-1">
+    <div class="titulo-sec"><h2>Descontos no benefício</h2><p>Rubrica 216 do HISCRE. Cada desconto é atribuído pelo valor da parcela dentro da janela do contrato.</p></div>
+    <div class="card">
+      <div class="linha-botoes" style="justify-content:space-between;margin-bottom:12px">
+        <div id="desc-modo"></div>
+        <div class="linha-botoes">
+          <button type="button" class="btn peq sec" id="b-colar-hiscre">Colar descontos</button>
+          <button type="button" class="btn peq sec" id="b-add-desc">+ Desconto</button>
+          <button type="button" class="btn peq ghost" id="b-limpa-desc">Limpar</button>
+        </div>
+      </div>
+      <div class="tabela-wrap" style="max-height:460px">
+        <table class="edit" id="tb-descontos">
+          <caption class="sr">Descontos lidos do HISCRE</caption>
+          <thead><tr><th>Competência</th><th>Data do pagamento</th><th class="v">Valor</th><th>Atribuído a</th><th><span class="sr">Remover</span></th></tr></thead>
+          <tbody></tbody>
+        </table>
+      </div>
+    </div>
+    <div class="prox"><button type="button" class="btn sec" data-ir="contratos">← Contratos</button><button type="button" class="btn" data-ir="parametros">Parâmetros →</button></div>
+  </section>
+
+  <!-- ======================= 4. PARÂMETROS -->
+  <section class="painel" id="p-parametros" role="tabpanel" aria-labelledby="t-parametros" tabindex="-1">
+    <div class="titulo-sec"><h2>Parâmetros do cálculo</h2><p>O padrão segue o modelo do escritório. Cada opção mostra a sua base.</p></div>
+    <div class="grid2">
+      <div class="card">
+        <h3>O que se impugna</h3>
+        <p class="sub">Define o que é indevido em cada mês.</p>
+        <div class="opcoes" role="radiogroup" aria-label="O que se impugna">
+          <label class="opcao"><input type="radio" name="modo" value="excedente"><span><b>Só os refinanciamentos (padrão)</b><small>O cliente reconhece o contrato original. Até o término original, desconta-se a parcela que já era devida; depois dele, a parcela inteira é indevida.</small><span class="fund">Pedido g.1 do modelo</span></span></label>
+          <label class="opcao"><input type="radio" name="modo" value="cadeia"><span><b>A cadeia inteira</b><small>O cliente não reconhece nem o primeiro contrato: todo desconto da cadeia é indevido.</small><span class="fund">Pedido g.2 · confirmar com o cliente</span></span></label>
+        </div>
+      </div>
+      <div class="card">
+        <h3>Restituição</h3>
+        <p class="sub">Repetição do indébito.</p>
+        <div class="opcoes" role="radiogroup" aria-label="Restituição">
+          <label class="opcao"><input type="radio" name="dobro" value="modulacao"><span><b>Dobro após 30/03/2021 (padrão)</b><small>Simples antes; em dobro depois, sem precisar provar má-fé.</small><span class="fund">CDC art. 42, p. único · STJ EAREsp 676.608/RS</span></span></label>
+          <label class="opcao"><input type="radio" name="dobro" value="dobro"><span><b>Tudo em dobro</b><small>Quando há prova de má-fé também no período anterior.</small><span class="fund">CDC art. 42, p. único</span></span></label>
+          <label class="opcao"><input type="radio" name="dobro" value="simples"><span><b>Simples</b><small>Cenário conservador.</small></span></label>
+        </div>
+      </div>
+      <div class="card">
+        <h3>Atualização</h3>
+        <p class="sub">Correção e juros até a data do cálculo.</p>
+        <div class="opcoes" role="radiogroup" aria-label="Regime de atualização">
+          <label class="opcao"><input type="radio" name="regime" value="lei14905"><span><b>Lei 14.905/2024 (padrão)</b><small id="reg-desc">INPC + 1% a.m. até 08/2024; IPCA + taxa legal do BCB a partir de 09/2024.</small><span class="fund">CC arts. 389 e 406 · Res. CMN 5.171/2024</span></span></label>
+          <label class="opcao"><input type="radio" name="regime" value="selic"><span><b>SELIC única</b><small>Taxa SELIC simples, que já inclui correção e juros.</small><span class="fund">CC art. 406, red. anterior · conferir tese do tribunal</span></span></label>
+          <label class="opcao"><input type="radio" name="regime" value="nenhum"><span><b>Sem atualização</b><small>Valores nominais (para conferência).</small></span></label>
+        </div>
+        <div class="grid2" style="margin-top:14px">
+          <label class="campo">Índice antes de 09/2024
+            <select id="i-indice"><option value="INPC">INPC (IBGE)</option><option value="IPCA-E">IPCA-E (IBGE)</option><option value="IPCA">IPCA (IBGE)</option></select>
+            <span class="dica">TJAM: INPC · TJRJ: IPCA-E (Lei 6.899/81, tabela da CGJ)</span></label>
+          <label class="campo">Juros antes de 09/2024 (% a.m.)
+            <input id="i-juros" inputmode="decimal"><span class="dica">CC art. 406 c/c CTN art. 161, § 1º</span></label>
+          <label class="campo">Juros de mora desde
+            <select id="i-jdesde"><option value="evento">Cada desconto (evento danoso)</option><option value="citacao">A citação</option></select>
+            <span class="dica">STJ, Súmula 54 (responsabilidade extracontratual)</span></label>
+          <label class="campo">Data da citação<input type="date" id="i-citacao"><span class="dica">Só se os juros correrem da citação.</span></label>
+        </div>
+      </div>
+      <div class="card">
+        <h3>Prazo, dano moral e data</h3>
+        <p class="sub">&nbsp;</p>
+        <div class="grid2">
+          <label class="campo">Prescrição
+            <select id="i-presc"><option value="10">10 anos · CC art. 205 (escritório)</option><option value="5">5 anos · CDC art. 27</option></select></label>
+          <label class="campo">Ajuizamento<input type="date" id="i-ajuiz"><span class="dica">Marco da prescrição. Vazio = data do cálculo.</span></label>
+          <label class="campo">Dano moral pedido (R$)<input id="i-dano" inputmode="decimal"><span class="dica">Padrão do escritório: R$ 15.000,00</span></label>
+          <label class="campo">Data do cálculo<input type="date" id="i-data"></label>
+        </div>
+      </div>
+    </div>
+    <div class="prox"><button type="button" class="btn sec" data-ir="descontos">← Descontos</button><button type="button" class="btn ouro" data-ir="resultado">Ver resultado →</button></div>
+  </section>
+
+  <!-- ======================= 5. RESULTADO -->
+  <section class="painel" id="p-resultado" role="tabpanel" aria-labelledby="t-resultado" tabindex="-1">
+    <div class="so-impressao" id="cab-impressao"></div>
+    <div class="titulo-sec"><h2>Resultado</h2><p id="res-sub"></p>
+      <div class="linha-botoes nao-imprimir" style="margin-left:auto">
+        <button type="button" class="btn peq" id="b-imprimir">Memória de cálculo (PDF)</button>
+        <button type="button" class="btn peq sec" id="b-csv">Planilha (CSV)</button>
+        <button type="button" class="btn peq sec" id="b-salvar">Salvar caso</button>
+      </div>
+    </div>
+    <div id="resultado"></div>
+  </section>
+</div>
+
+<!-- ======================= RESUMO AO VIVO -->
+<aside class="resumo" aria-label="Resumo do cálculo">
+  <div class="res-card" aria-live="polite">
+    <div class="res-top"><span>Valor da causa</span><b id="r-causa">R$ 0,00</b><small id="r-causa-ext">dobro do indébito + dano moral</small></div>
+    <div class="res-lin"><span>Indébito (simples)</span><b id="r-ind">—</b></div>
+    <div class="res-lin"><span>Restituição (nominal)</span><b id="r-dobro">—</b></div>
+    <div class="res-lin"><span>Restituição atualizada</span><b id="r-atual">—</b></div>
+    <div class="res-lin"><span>Dano moral</span><b id="r-dano">—</b></div>
+    <div class="res-lin"><span>Descontos impugnados</span><b id="r-n">—</b></div>
+  </div>
+  <div class="avisos" id="avisos" aria-live="polite"></div>
+  <div class="indices" id="st-indices">Índices: cópia de 24/11/2026.</div>
+</aside>
+</main>
+
+<footer>
+  Ferramenta de apoio ao cálculo. Os valores dependem da conferência do HISCON e do HISCRE e da tese adotada na peça; confira índices e precedentes antes de protocolar.
+  Índices: Banco Central do Brasil (SGS 433, 188, 10764, 4390 e 29543). <span id="versao"></span>
+</footer>
+
+<dialog id="dlg-colar" aria-labelledby="dlg-colar-t">
+  <div class="dlg">
+    <h3 id="dlg-colar-t">Colar tabela</h3>
+    <p class="sub" id="dlg-colar-d"></p>
+    <label class="sr" for="ta-colar">Conteúdo</label>
+    <textarea id="ta-colar" spellcheck="false"></textarea>
+    <div class="linha-botoes" style="justify-content:flex-end;margin-top:12px">
+      <button type="button" class="btn sec" id="b-colar-cancela">Cancelar</button>
+      <button type="button" class="btn" id="b-colar-ok">Importar</button>
+    </div>
+  </div>
+</dialog>
+
+<script src="indices.js"></script>
+<script src="exemplo.js"></script>
+<script src="motor.js"></script>
+<script type="module">
+const M = globalThis.Motor;
+const IDX = globalThis.INDICES_BCB;
+const $ = (s, el = document) => el.querySelector(s);
+const $$ = (s, el = document) => [...el.querySelectorAll(s)];
+const esc = (v) => String(v ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+const brl = M.brl;
+const numBR = (v) => v === null || v === undefined || v === "" ? "" : Number(v).toLocaleString("pt-BR", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+const hoje = () => { const d = new Date(); return new Date(d.getTime() - d.getTimezoneOffset() * 60000).toISOString().slice(0, 10); };
+$("#versao").textContent = "Motor v" + M.VERSAO + ".";
+
+// ------------------------------------------------------------ estado
+const CHAVE = "laadv-refin-caso-v1";
+const novoEstado = () => ({
+  cliente: { nome: "", nb: "", especie: "" },
+  cfg: Object.assign({}, M.CFG_PADRAO, M.PRESETS.TJAM, { dataCalculo: hoje() }),
+  contratos: [], hiscre: [], fontes: {},
+});
+let S = (() => { try { const s = JSON.parse(localStorage.getItem(CHAVE)); if (s && s.cfg) return s; } catch {} return novoEstado(); })();
+let R = null; // último resultado
+const salvarLocal = () => { try { localStorage.setItem(CHAVE, JSON.stringify(S)); } catch {} };
+
+// ------------------------------------------------------------ abas
+const ABAS = ["documentos", "contratos", "descontos", "parametros", "resultado"];
+function ir(aba) {
+  for (const a of ABAS) {
+    const t = $("#t-" + a), p = $("#p-" + a);
+    const on = a === aba;
+    t.setAttribute("aria-selected", on); t.tabIndex = on ? 0 : -1;
+    p.classList.toggle("ativo", on);
+  }
+  $("#p-" + aba).focus({ preventScroll: true });
+  window.scrollTo({ top: $("nav.passos").offsetTop, behavior: "smooth" });
+}
+$$(".passos [role=tab]").forEach((t, i, todos) => {
+  t.addEventListener("click", () => ir(ABAS[i]));
+  t.addEventListener("keydown", (e) => {
+    const d = e.key === "ArrowRight" ? 1 : e.key === "ArrowLeft" ? -1 : 0;
+    if (d) { const n = todos[(i + d + todos.length) % todos.length]; n.focus(); n.click(); }
+  });
+});
+$$("[data-ir]").forEach((b) => b.addEventListener("click", () => ir(b.dataset.ir)));
+
+// ------------------------------------------------------------ tribunal
+function aplicarTribunal(t, manterUsuario) {
+  Object.assign(S.cfg, M.PRESETS[t]);
+  $$(".seg button").forEach((b) => b.setAttribute("aria-pressed", b.dataset.trib === t));
+  $("#reg-desc").textContent = `${t === "TJRJ" ? "IPCA-E" : "INPC"} + 1% a.m. até 08/2024; IPCA + taxa legal do BCB a partir de 09/2024.`;
+  preencherParametros(); recalcular();
+}
+$$(".seg button").forEach((b) => b.addEventListener("click", () => aplicarTribunal(b.dataset.trib)));
+
+// ------------------------------------------------------------ parâmetros
+function preencherParametros() {
+  const c = S.cfg;
+  $$("input[name=modo]").forEach((i) => (i.checked = i.value === c.modo));
+  $$("input[name=dobro]").forEach((i) => (i.checked = i.value === c.dobro));
+  $$("input[name=regime]").forEach((i) => (i.checked = i.value === c.regime));
+  $("#i-indice").value = c.indiceAntes; $("#i-juros").value = numBR(c.jurosAntes).replace(",00", "");
+  $("#i-jdesde").value = c.jurosDesde; $("#i-citacao").value = c.dataCitacao || "";
+  $("#i-presc").value = String(c.prescricaoAnos); $("#i-ajuiz").value = c.dataAjuizamento || "";
+  $("#i-dano").value = numBR(c.danoMoral); $("#i-data").value = c.dataCalculo;
+  $("#i-nome").value = S.cliente.nome || ""; $("#i-nb").value = S.cliente.nb || ""; $("#i-especie").value = S.cliente.especie || "";
+  $("#i-base").value = c.baseCalculo ? numBR(c.baseCalculo) : "";
+}
+const lig = (sel, ev, fn) => $(sel).addEventListener(ev, fn);
+$$("input[name=modo],input[name=dobro],input[name=regime]").forEach((i) => i.addEventListener("change", () => { S.cfg[i.name] = i.value; recalcular(); }));
+lig("#i-indice", "change", (e) => { S.cfg.indiceAntes = e.target.value; recalcular(); });
+lig("#i-juros", "change", (e) => { S.cfg.jurosAntes = M.parseBR(e.target.value) ?? 1; recalcular(); });
+lig("#i-jdesde", "change", (e) => { S.cfg.jurosDesde = e.target.value; recalcular(); });
+lig("#i-citacao", "change", (e) => { S.cfg.dataCitacao = e.target.value; recalcular(); });
+lig("#i-presc", "change", (e) => { S.cfg.prescricaoAnos = Number(e.target.value); recalcular(); });
+lig("#i-ajuiz", "change", (e) => { S.cfg.dataAjuizamento = e.target.value; recalcular(); });
+lig("#i-dano", "change", (e) => { S.cfg.danoMoral = M.parseBR(e.target.value) ?? 0; e.target.value = numBR(S.cfg.danoMoral); recalcular(); });
+lig("#i-data", "change", (e) => { S.cfg.dataCalculo = e.target.value || hoje(); recalcular(); });
+lig("#i-base", "change", (e) => { S.cfg.baseCalculo = M.parseBR(e.target.value); e.target.value = S.cfg.baseCalculo ? numBR(S.cfg.baseCalculo) : ""; recalcular(); });
+["nome", "nb", "especie"].forEach((k) => lig("#i-" + k, "input", (e) => { S.cliente[k] = e.target.value; salvarLocal(); }));
+lig("#i-reu", "change", (e) => { S.cfg.bancoReu = e.target.value; recalcular(); });
+
+// ------------------------------------------------------------ contratos (tabela editável)
+const CAMPOS = [
+  ["contrato", "text", "w-ctr"], ["banco", "text", "w-num"], ["situacao", "sel-sit"], ["origem", "sel-ori"],
+  ["inclusao", "date"], ["inicio", "month"], ["fim", "month"], ["qtd", "number", "w-num"], ["parcela", "money"],
+  ["emprestado", "money"], ["liberado", "money"], ["pago", "money"], ["exclusao", "date"], ["origemExclusao", "sel-exc"], ["reconhecido", "check"],
+];
+const ROT = { contrato: "Contrato", banco: "Banco", situacao: "Situação", origem: "Origem da averbação", inclusao: "Inclusão", inicio: "Início do desconto", fim: "Fim do desconto", qtd: "Quantidade de parcelas", parcela: "Parcela", emprestado: "Emprestado", liberado: "Liberado", pago: "Valor pago", exclusao: "Exclusão", origemExclusao: "Origem da exclusão", reconhecido: "Cliente reconhece" };
+function celula(c, i, [k, tipo, cls]) {
+  const v = c[k];
+  const aria = `aria-label="${ROT[k]}, linha ${i + 1}"`;
+  if (tipo === "sel-sit") return `<select data-k="${k}" ${aria}>${["", ...M.SITUACOES].map((o) => `<option ${o === v ? "selected" : ""}>${o}</option>`).join("")}</select>`;
+  if (tipo === "sel-ori") return `<select data-k="${k}" ${aria}>${[["", "—"], ["nova", "Nova"], ["refin", "Refinanciamento"], ["port", "Portabilidade"], ["outra", "Outra"]].map(([o, t]) => `<option value="${o}" ${o === v ? "selected" : ""}>${t}</option>`).join("")}</select>`;
+  if (tipo === "sel-exc") return `<select data-k="${k}" ${aria}>${[["", "—"], ["refin", "Por refinanciamento"], ["port", "Por portabilidade"], ["outra", "Outra"]].map(([o, t]) => `<option value="${o}" ${o === v ? "selected" : ""}>${t}</option>`).join("")}</select>`;
+  if (tipo === "check") return `<input type="checkbox" data-k="${k}" ${v ? "checked" : ""} ${aria} style="width:auto">`;
+  if (tipo === "money") return `<input class="w-mon" data-k="${k}" inputmode="decimal" value="${esc(numBR(v))}" ${aria}>`;
+  return `<input type="${tipo}" class="${cls || ""}" data-k="${k}" value="${esc(v ?? "")}" ${aria}>`;
+}
+function renderContratos() {
+  const tb = $("#tb-contratos tbody");
+  if (!S.contratos.length) { tb.innerHTML = `<tr><td colspan="16"><div class="vazio"><b>Nenhum contrato ainda</b>Envie o HISCON, cole a tabela ou clique em “+ Contrato”.</div></td></tr>`; return; }
+  tb.innerHTML = S.contratos.map((c, i) => `<tr data-i="${i}">${CAMPOS.map((f) => `<td>${celula(c, i, f)}</td>`).join("")}<td><button type="button" class="btn ghost peq" data-rm="${i}" aria-label="Remover contrato ${esc(c.contrato || i + 1)}">✕</button></td></tr>`).join("");
+}
+$("#tb-contratos").addEventListener("change", (e) => {
+  const tr = e.target.closest("tr[data-i]"); const k = e.target.dataset.k; if (!tr || !k) return;
+  const c = S.contratos[Number(tr.dataset.i)];
+  if (e.target.type === "checkbox") c[k] = e.target.checked;
+  else if (["parcela", "emprestado", "liberado", "pago"].includes(k)) { c[k] = M.parseBR(e.target.value); e.target.value = numBR(c[k]); }
+  else if (k === "qtd") c[k] = e.target.value ? Number(e.target.value) : null;
+  else if (k === "banco") { const n = M.normContrato({ banco: e.target.value }); c.banco = n.banco; if (n.bancoNome) c.bancoNome = n.bancoNome; }
+  else c[k] = e.target.value;
+  recalcular(false);
+});
+$("#tb-contratos").addEventListener("click", (e) => { const b = e.target.closest("[data-rm]"); if (!b) return; S.contratos.splice(Number(b.dataset.rm), 1); renderContratos(); recalcular(); });
+lig("#b-add", "click", () => { S.contratos.push(M.normContrato({ banco: S.cfg.bancoReu || "" }, S.contratos.length + Date.now())); renderContratos(); recalcular(); const ultima = $("#tb-contratos tbody tr:last-child input"); ultima && ultima.focus(); });
+lig("#b-manual", "click", () => { if (!S.contratos.length) $("#b-add").click(); ir("contratos"); });
+
+// ------------------------------------------------------------ descontos
+function renderDescontos() {
+  const tb = $("#tb-descontos tbody");
+  const atrib = {};
+  if (R) for (const m of R.memoria) atrib[m.comp + "|" + m.descontado] = m;
+  $("#desc-modo").innerHTML = S.hiscre.length
+    ? `<span class="chip ok">✓ ${S.hiscre.length} desconto(s) do HISCRE</span>`
+    : `<span class="chip est">Sem HISCRE · descontos estimados pelo HISCON</span>`;
+  if (!S.hiscre.length) { tb.innerHTML = `<tr><td colspan="5"><div class="vazio"><b>Sem Histórico de Créditos</b>O cálculo usa um desconto por mês na janela de cada contrato. Envie o HISCRE no passo 1 ou cole os descontos.</div></td></tr>`; return; }
+  tb.innerHTML = S.hiscre.map((d, i) => {
+    const m = atrib[d.comp + "|" + M.r2(M.parseBR(d.valor) || 0)];
+    return `<tr data-i="${i}"><td><input type="month" data-k="comp" value="${esc(d.comp)}" aria-label="Competência, linha ${i + 1}"></td>
+      <td><input type="date" data-k="data" value="${esc(d.data || "")}" aria-label="Data do pagamento, linha ${i + 1}"></td>
+      <td class="v"><input class="w-mon" data-k="valor" inputmode="decimal" value="${esc(numBR(d.valor))}" aria-label="Valor, linha ${i + 1}"></td>
+      <td>${m ? `<span class="mono">${esc(m.rotulo)} · ${esc(m.contrato)}</span>` : `<span class="chip nao">não atribuído</span>`}</td>
+      <td><button type="button" class="btn ghost peq" data-rm="${i}" aria-label="Remover desconto ${i + 1}">✕</button></td></tr>`;
+  }).join("");
+}
+$("#tb-descontos").addEventListener("change", (e) => {
+  const tr = e.target.closest("tr[data-i]"); const k = e.target.dataset.k; if (!tr || !k) return;
+  const d = S.hiscre[Number(tr.dataset.i)];
+  d[k] = k === "valor" ? M.parseBR(e.target.value) : e.target.value;
+  recalcular();
+});
+$("#tb-descontos").addEventListener("click", (e) => { const b = e.target.closest("[data-rm]"); if (!b) return; S.hiscre.splice(Number(b.dataset.rm), 1); recalcular(); });
+lig("#b-add-desc", "click", () => { S.hiscre.push({ comp: "", data: "", valor: null }); recalcular(); });
+lig("#b-limpa-desc", "click", () => { S.hiscre = []; delete S.fontes.hiscre; $("#e-hiscre").textContent = ""; $("#d-hiscre").classList.remove("ok"); recalcular(); });
+
+// ------------------------------------------------------------ colar
+let modoColar = "hiscon";
+function abrirColar(modo) {
+  modoColar = modo;
+  $("#dlg-colar-t").textContent = modo === "hiscon" ? "Colar tabela do HISCON" : "Colar descontos do HISCRE";
+  $("#dlg-colar-d").textContent = modo === "hiscon"
+    ? "Copie do Excel com a linha de cabeçalho (Contrato, Banco, Situação, Origem da averbação, Data inclusão, Início de desconto, Fim de desconto, Qtde parcelas, Parcela, Emprestado, Liberado, Valor pago, Exclusão, Origem da exclusão)."
+    : "Uma linha por desconto: competência; data do pagamento; valor. Ex.: 04/2024;06/05/2024;320,00. Também aceita o texto do HISCRE copiado do PDF.";
+  $("#ta-colar").value = ""; $("#dlg-colar").showModal(); $("#ta-colar").focus();
+}
+lig("#b-colar", "click", () => abrirColar("hiscon"));
+lig("#b-colar-hiscre", "click", () => abrirColar("hiscre"));
+lig("#b-colar-cancela", "click", () => $("#dlg-colar").close());
+lig("#b-colar-ok", "click", () => {
+  const txt = $("#ta-colar").value;
+  if (modoColar === "hiscon") {
+    const cs = M.lerTabelaColada(txt);
+    if (!cs.length) { alertaTopo("erro", "Não reconheci a tabela. Confira se a primeira linha é o cabeçalho."); return; }
+    S.contratos = cs; renderContratos(); ir("contratos");
+  } else {
+    let ds = M.lerHiscre(txt);
+    if (!ds.length) ds = txt.split(/\r?\n/).map((l) => l.split(/[;\t]/)).filter((p) => p.length >= 2)
+      .map((p) => p.length === 2 ? { comp: M.compISO(p[0]), data: "", valor: M.parseBR(p[1]) } : { comp: M.compISO(p[0]), data: M.dataISO(p[1]) || "", valor: M.parseBR(p[2]) })
+      .filter((d) => d.comp && d.valor !== null);
+    if (!ds.length) { alertaTopo("erro", "Não achei descontos no texto colado."); return; }
+    S.hiscre = ds;
+  }
+  $("#dlg-colar").close(); recalcular();
+});
+
+// ------------------------------------------------------------ PDF + OCR
+let pdfjs = null;
+async function carregarPdfjs() {
+  if (pdfjs) return pdfjs;
+  pdfjs = await import("https://cdn.jsdelivr.net/npm/pdfjs-dist@4.10.38/build/pdf.min.mjs");
+  pdfjs.GlobalWorkerOptions.workerSrc = "https://cdn.jsdelivr.net/npm/pdfjs-dist@4.10.38/build/pdf.worker.min.mjs";
+  return pdfjs;
+}
+let tesseract = null;
+function carregarTesseract() {
+  if (tesseract) return Promise.resolve(tesseract);
+  return new Promise((ok, falha) => {
+    const s = document.createElement("script");
+    s.src = "https://cdn.jsdelivr.net/npm/tesseract.js@5.1.1/dist/tesseract.min.js";
+    s.integrity = "sha384-GJqSu7vueQ9qN0E9yLPb3Wtpd7OrgK8KmYzC8T1IysG1bcvxvIO4qtYR/D3A991F";
+    s.crossOrigin = "anonymous";
+    s.onload = () => ok((tesseract = globalThis.Tesseract)); s.onerror = () => falha(new Error("Não carreguei o OCR (sem internet?)."));
+    document.head.appendChild(s);
+  });
+}
+/** Palavras {t,x,y,w,h,p} de todas as páginas. Página sem texto → OCR. */
+async function palavrasDoPdf(arquivo, progresso, girar = 0) {
+  const lib = await carregarPdfjs();
+  const doc = await lib.getDocument({ data: await arquivo.arrayBuffer() }).promise;
+  const todas = []; let usouOcr = false; let texto = "";
+  let worker = null;
+  for (let p = 1; p <= doc.numPages; p++) {
+    const pag = await doc.getPage(p);
+    const vp = pag.getViewport({ scale: 1, rotation: (pag.rotate + girar) % 360 });
+    const tc = await pag.getTextContent();
+    const itens = tc.items.filter((it) => it.str && it.str.trim());
+    if (itens.reduce((s, it) => s + it.str.length, 0) > 80) {
+      for (const it of itens) {
+        const tr = lib.Util.transform(vp.transform, it.transform);
+        const h = Math.hypot(tr[2], tr[3]) || 8;
+        const larg = (it.width || 0) * vp.scale;
+        const x0 = tr[4], y = tr[5] - h / 2;
+        // divide a frase em palavras, com x proporcional ao nº de caracteres
+        const total = it.str.length || 1; let pos = 0;
+        for (const parte of it.str.split(/(\s+)/)) {
+          if (parte.trim()) todas.push({ t: parte, x: x0 + larg * (pos / total), w: larg * (parte.length / total), y, h, p });
+          pos += parte.length;
+        }
+        texto += it.str + (it.hasEOL ? "\n" : " ");
+      }
+      texto += "\n";
+    } else {
+      usouOcr = true;
+      const T = await carregarTesseract();
+      worker = worker || await T.createWorker("por", 1, { logger: (m) => m.status === "recognizing text" && progresso((p - 1 + m.progress) / doc.numPages, `OCR página ${p}/${doc.numPages}`) });
+      const esc2 = 2.2, vp2 = pag.getViewport({ scale: esc2, rotation: (pag.rotate + girar) % 360 });
+      const cv = document.createElement("canvas"); cv.width = vp2.width; cv.height = vp2.height;
+      await pag.render({ canvasContext: cv.getContext("2d"), viewport: vp2 }).promise;
+      const { data } = await worker.recognize(cv);
+      for (const w of data.words || []) todas.push({ t: w.text, x: w.bbox.x0 / esc2, w: (w.bbox.x1 - w.bbox.x0) / esc2, y: (w.bbox.y0 + w.bbox.y1) / 2 / esc2, h: (w.bbox.y1 - w.bbox.y0) / esc2, p });
+      texto += (data.text || "") + "\n";
+    }
+    progresso(p / doc.numPages, `Página ${p}/${doc.numPages}`);
+  }
+  if (worker) await worker.terminate();
+  // texto linha a linha a partir das posições (melhor que a ordem do PDF)
+  const linhas = {};
+  for (const w of todas) { const k = w.p + ":" + Math.round(w.y / 4); (linhas[k] = linhas[k] || []).push(w); }
+  const textoLinhas = Object.entries(linhas).sort((a, b) => { const [pa, ya] = a[0].split(":").map(Number), [pb, yb] = b[0].split(":").map(Number); return pa - pb || ya - yb; })
+    .map(([, ws]) => ws.sort((a, b) => a.x - b.x).map((w) => w.t).join(" ")).join("\n");
+  return { palavras: todas, texto, textoLinhas, paginas: doc.numPages, usouOcr };
+}
+function progressoDe(id) {
+  const b = $("#b-" + id), e = $("#e-" + id);
+  b.style.display = "block";
+  return (f, msg) => { b.firstElementChild.style.width = Math.round(f * 100) + "%"; e.textContent = msg; };
+}
+async function lerArquivoHiscon(arq) {
+  const prog = progressoDe("hiscon");
+  try {
+    let r = await palavrasDoPdf(arq, prog);
+    let lido = M.lerHisconPalavras(r.palavras);
+    if (!lido.contratos.length && r.usouOcr) { prog(0, "Tentando com a página girada…"); r = await palavrasDoPdf(arq, prog, 90); lido = M.lerHisconPalavras(r.palavras); }
+    const cab = M.lerHisconCabecalho(r.textoLinhas + "\n" + r.texto);
+    if (cab.nb && !S.cliente.nb) S.cliente.nb = cab.nb;
+    if (cab.especie && !S.cliente.especie) S.cliente.especie = cab.especie;
+    if (cab.baseCalculo) S.cfg.baseCalculo = cab.baseCalculo;
+    if (lido.contratos.length) S.contratos = lido.contratos;
+    S.fontes.hiscon = { nome: arq.name, paginas: r.paginas, ocr: r.usouOcr, margemExtrapolada: cab.margemExtrapolada || 0 };
+    $("#d-hiscon").classList.add("ok");
+    $("#e-hiscon").textContent = `✓ ${arq.name}: ${r.paginas} pág.${r.usouOcr ? " (OCR)" : ""} · ${lido.contratos.length} contrato(s) lidos. Confira no passo 2.`;
+    lido.avisos.forEach((a) => alertaTopo(a.nivel, a.texto));
+    preencherParametros(); renderContratos(); recalcular();
+    if (lido.contratos.length) ir("contratos");
+  } catch (err) { $("#e-hiscon").textContent = "Erro: " + err.message; console.error(err); }
+  finally { $("#b-hiscon").style.display = "none"; }
+}
+async function lerArquivoHiscre(arq) {
+  const prog = progressoDe("hiscre");
+  try {
+    const r = await palavrasDoPdf(arq, prog);
+    let ds = M.lerHiscre(r.textoLinhas);
+    if (!ds.length) ds = M.lerHiscre(r.texto);
+    S.hiscre = ds;
+    S.fontes.hiscre = { nome: arq.name, paginas: r.paginas, ocr: r.usouOcr };
+    $("#d-hiscre").classList.add("ok");
+    $("#e-hiscre").textContent = ds.length ? `✓ ${arq.name}: ${ds.length} desconto(s) da rubrica 216.` : `Li ${r.paginas} pág., mas não achei a rubrica 216. Use “Colar descontos”.`;
+    recalcular();
+  } catch (err) { $("#e-hiscre").textContent = "Erro: " + err.message; console.error(err); }
+  finally { $("#b-hiscre").style.display = "none"; }
+}
+for (const [id, fn] of [["hiscon", lerArquivoHiscon], ["hiscre", lerArquivoHiscre]]) {
+  const d = $("#d-" + id), f = $("#f-" + id);
+  f.addEventListener("change", () => f.files[0] && fn(f.files[0]));
+  d.addEventListener("dragover", (e) => { e.preventDefault(); d.classList.add("sobre"); });
+  d.addEventListener("dragleave", () => d.classList.remove("sobre"));
+  d.addEventListener("drop", (e) => { e.preventDefault(); d.classList.remove("sobre"); const a = e.dataTransfer.files[0]; if (a) fn(a); });
+}
+
+// ------------------------------------------------------------ avisos
+const ICONE = {
+  erro: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 7v6M12 16.5v.5"/></svg>',
+  alerta: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M12 3 2 20h20L12 3Z"/><path d="M12 10v4M12 17v.5"/></svg>',
+  info: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 11v6M12 7.5v.5"/></svg>',
+};
+let avisosExtras = [];
+function alertaTopo(nivel, texto) { avisosExtras.push({ nivel, texto }); renderAvisos(); }
+function renderAvisos() {
+  const lista = [...avisosExtras, ...(R ? R.avisos : [])];
+  const ordem = { erro: 0, alerta: 1, info: 2 };
+  lista.sort((a, b) => ordem[a.nivel] - ordem[b.nivel]);
+  const rot = { erro: "Erro", alerta: "Atenção", info: "Nota" };
+  $("#avisos").innerHTML = lista.slice(0, 8).map((a) => `<div class="aviso ${a.nivel}">${ICONE[a.nivel]}<span><span class="sr">${rot[a.nivel]}: </span>${esc(a.texto)}</span></div>`).join("")
+    + (lista.length > 8 ? `<div class="indices">+ ${lista.length - 8} nota(s) no resultado.</div>` : "");
+}
+
+// ------------------------------------------------------------ cálculo
+let tCalc = null;
+function recalcular(redesenharTabela = true) {
+  clearTimeout(tCalc);
+  tCalc = setTimeout(() => {
+    avisosExtras = avisosExtras.slice(-3);
+    R = S.contratos.length ? M.calcular({ contratos: S.contratos, hiscre: S.hiscre.length ? S.hiscre : null, cfg: S.cfg }, IDX) : null;
+    if (R && !S.cfg.bancoReu) S.cfg.bancoReu = R.cfg.bancoReu;
+    if (redesenharTabela) renderContratos();
+    renderReu(); renderCadeias(); renderDescontos(); renderResumo(); renderResultado(); renderAvisos(); salvarLocal();
+    $$(".passos [role=tab]").forEach((t, i) => t.classList.toggle("feito", (i === 0 && !!S.contratos.length) || (i === 1 && R && R.analises.length > 0) || (i === 2 && S.hiscre.length > 0)));
+  }, 60);
+}
+function renderReu() {
+  const bancos = {};
+  for (const c of S.contratos) if (c.banco) bancos[c.banco] = c.bancoNome || bancos[c.banco] || "";
+  const sel = $("#i-reu");
+  sel.innerHTML = Object.keys(bancos).length ? Object.entries(bancos).map(([k, n]) => `<option value="${esc(k)}" ${k === S.cfg.bancoReu ? "selected" : ""}>${esc(k)}${n ? " · " + esc(n) : ""}</option>`).join("") : `<option value="">—</option>`;
+}
+function renderResumo() {
+  const t = R ? R.totais : null;
+  $("#r-causa").textContent = t ? brl(t.valorCausa) : "R$ 0,00";
+  $("#r-causa-ext").textContent = t ? R.tokens.VALOR_CAUSA_EXTENSO : "dobro do indébito + dano moral";
+  $("#r-ind").textContent = t ? brl(t.indevido) : "—";
+  $("#r-dobro").textContent = t ? brl(t.dobro) : "—";
+  $("#r-atual").textContent = t ? brl(t.atualizado) : "—";
+  $("#r-dano").textContent = t ? brl(t.danoMoral) : "—";
+  $("#r-n").textContent = t ? `${t.n}${t.estimado ? " (estimados)" : ""}` : "—";
+}
+
+// ------------------------------------------------------------ cadeias (visual)
+function renderCadeias() {
+  const box = $("#cadeias");
+  if (!R || !R.rec.cadeias.length) { box.innerHTML = `<div class="vazio"><b>Nenhuma cadeia</b>Um refinanciamento precisa de um contrato do mesmo banco excluído “por refinanciamento” na data da sua inclusão.</div>`; return; }
+  const an = Object.fromEntries(R.analises.map((a) => [a.e0.id, a]));
+  box.innerHTML = R.rec.cadeias.map((elos) => {
+    const a = an[elos[0].id];
+    const reu = elos[elos.length - 1].banco === R.cfg.bancoReu;
+    return `<div class="cadeia"><h4>Cadeia ${esc(R.rec.rotulo[elos[0].id][0])} · banco ${esc(elos[0].banco)}${elos[0].bancoNome ? " · " + esc(elos[0].bancoNome) : ""} ${reu ? "" : '<span class="chip nao">outro banco · ação autônoma</span>'}
+      ${a ? ` · término original <b>${M.compBR(a.termOrig)}</b>` : ""}</h4>
+      <div class="elos">${elos.map((e, k) => {
+        const rf = a && k > 0 ? a.refins[k - 1] : null;
+        const imp = reu && (R.cfg.modo === "cadeia" ? !e.reconhecido : k > 0 && !e.reconhecido);
+        const card = `<article class="elo ${k === 0 ? "zero" : ""} ${imp ? "imp" : ""}" aria-label="${esc(R.rec.rotulo[e.id])}, contrato ${esc(e.contrato)}">
+          <div class="r">${esc(R.rec.rotulo[e.id])} · ${esc(M.ORIGEM_ROTULO[e.origem] || "")}</div>
+          <div class="c">${esc(e.contrato)}</div>
+          <div style="margin-bottom:8px">${imp ? '<span class="chip imp">IMPUGNADO</span>' : '<span class="chip nao">NÃO impugnado</span>'}
+            ${k > 0 ? (rf && rf.semLiberacao ? '<span class="chip ok">sem liberação</span>' : '<span class="chip av">⚠ houve liberação</span>') : ""}
+            <span class="chip nao">${esc(e.situacao || "—")}</span></div>
+          <dl><dt>Parcela</dt><dd>${brl(e.parcela)}</dd><dt>Parcelas</dt><dd>${e.qtd ?? "—"}</dd><dt>Desconto</dt><dd>${M.compBR(e.inicio)} → ${e.exclusao ? M.dataBR(e.exclusao) : M.compBR(e.fim)}</dd>
+          ${rf ? `<dt>Restavam</dt><dd>${rf.restAntes ?? "—"}</dd><dt>Acrescidas</dt><dd><b>${rf.acrescidas ?? "—"}</b></dd><dt>Sem destino</dt><dd>${brl(rf.semDestino)}</dd>` : `<dt>Liberado</dt><dd>${brl(e.liberado)}</dd>`}</dl></article>`;
+        const seta = k < elos.length - 1 ? `<div class="seta" aria-hidden="true"><svg viewBox="0 0 40 16"><path d="M0 8h34M28 2l7 6-7 6" fill="none" stroke="currentColor" stroke-width="1.8"/></svg>refin.<br>${M.dataBR(elos[k + 1].inclusao)}</div>` : "";
+        return card + seta;
+      }).join("")}</div></div>`;
+  }).join("") + (R.rec.avulsos.length ? `<p class="sub" style="margin-top:10px">Fora de cadeia: ${R.rec.avulsos.map((c) => `<span class="mono">${esc(c.contrato)}</span> (${esc(c.banco)}, ${esc(M.ORIGEM_ROTULO[c.origem] || "—")})`).join(", ")}.</p>` : "");
+}
+
+// ------------------------------------------------------------ gráfico
+function grafico(res) {
+  const porMes = {};
+  for (const m of res.memoria) {
+    const o = porMes[m.comp] || (porMes[m.comp] = { dev: 0, ind: 0 });
+    if (m.impugnado && !m.prescrito) { o.ind += m.indevido; o.dev += m.deducao; } else o.dev += m.descontado;
+  }
+  const meses = Object.keys(porMes).sort();
+  if (meses.length < 2) return "";
+  const ini = M.mIdx(meses[0]), fim = M.mIdx(meses[meses.length - 1]);
+  const n = fim - ini + 1, W = 900, H = 230, pl = 54, pr = 12, pt = 14, pb = 34;
+  const max = Math.max(...meses.map((c) => porMes[c].dev + porMes[c].ind)) * 1.12 || 1;
+  const bw = (W - pl - pr) / n, y = (v) => pt + (H - pt - pb) * (1 - v / max);
+  let svg = `<svg class="grafico" viewBox="0 0 ${W} ${H}" role="img" aria-label="Descontos por mês: parte devida e parte indevida">`;
+  for (let k = 0; k <= 4; k++) { const v = max / 1.12 * k / 4, yy = y(v); svg += `<line x1="${pl}" x2="${W - pr}" y1="${yy}" y2="${yy}" stroke="#EAEFF4"/><text x="${pl - 8}" y="${yy + 4}" font-size="12" text-anchor="end" fill="#4F5E6E">${Math.round(v).toLocaleString("pt-BR")}</text>`; }
+  for (let i = 0; i < n; i++) {
+    const c = M.mStr(ini + i), o = porMes[c]; const x = pl + i * bw;
+    if (o) {
+      const t = `${M.compBR(c)}: devido ${brl(o.dev)} · indevido ${brl(o.ind)}`;
+      svg += `<g><title>${t}</title><rect x="${x + bw * .12}" width="${bw * .76}" y="${y(o.dev)}" height="${y(0) - y(o.dev)}" fill="#A8D4D0"/>`;
+      if (o.ind > 0) svg += `<rect x="${x + bw * .12}" width="${bw * .76}" y="${y(o.dev + o.ind)}" height="${y(o.dev) - y(o.dev + o.ind)}" fill="#C9A93E"/>`;
+      svg += `</g>`;
+    }
+    if (c.endsWith("-01")) svg += `<text x="${x + bw / 2}" y="${H - 12}" font-size="12" text-anchor="middle" fill="#4F5E6E">${c.slice(0, 4)}</text><line x1="${x}" x2="${x}" y1="${H - pb}" y2="${H - pb + 5}" stroke="#C6D0DC"/>`;
+  }
+  const marco = (comp, rot, cor) => { const i = M.mIdx(comp) - ini; if (i < 0 || i >= n) return ""; const x = pl + (i + 1) * bw; const fimDir = x > W - 130; return `<line x1="${x}" x2="${x}" y1="${pt}" y2="${H - pb}" stroke="${cor}" stroke-width="1.5" stroke-dasharray="4 3"/><text x="${fimDir ? x - 5 : x + 5}" y="${pt + 11}" font-size="12" fill="${cor}" font-weight="600" text-anchor="${fimDir ? "end" : "start"}">${rot}</text>`; };
+  res.analises.forEach((a) => { if (a.termOrig) svg += marco(a.termOrig, "término original", "#0B4A44"); });
+  if (res.cfg.dobro === "modulacao") svg += marco("2021-03", "30/03/2021", "#735C14");
+  svg += `<line x1="${pl}" x2="${W - pr}" y1="${y(0)}" y2="${y(0)}" stroke="#9AA5B5"/></svg>`;
+  return svg + `<div class="legenda"><span><i style="background:#A8D4D0"></i>Parte devida (contrato reconhecido)</span><span><i style="background:#C9A93E"></i>Parte indevida</span><span><i style="background:#0B4A44;height:2px;vertical-align:3px"></i>Término original do contrato reconhecido</span></div>`;
+}
+
+// ------------------------------------------------------------ resultado
+function fundamentos(trib) {
+  const am = `<h4>Amazonas</h4><ul>
+    <li><b>Lei estadual 5.712/2021</b>: proíbe instituição financeira de creditar na conta de beneficiário do INSS, sem contrato ou consentimento, para efetivar consignado (multa de 50 salários mínimos). <a href="https://sapl.al.am.leg.br/norma/11655" target="_blank" rel="noopener">SAPL</a></li>
+    <li><b>Lei estadual 5.908/2022</b>, art. 2º, § 1º: empréstimo com aposentado e pensionista exige contrato assinado com documento de identidade; autorização por telefone e gravação de voz não valem como prova. <a href="https://sapl.al.am.leg.br/norma/11937" target="_blank" rel="noopener">SAPL</a></li>
+    <li><b>Lei estadual 6.087/2022</b>: o contrato deve discriminar encargos, juros e custo efetivo; desistência em 7 dias quando contratado por telefone ou internet (art. 3º). <a href="https://sapl.al.am.leg.br/norma/12238" target="_blank" rel="noopener">SAPL</a></li>
+    <li><b>TJAM</b>: correção pelo INPC até a Lei 14.905/2024 e IPCA depois. <span class="conferir">conferir portaria vigente</span> A uniformização do TJAM sobre cartão consignado condiciona o dobro à má-fé; o STJ (EAREsp 676.608) dispensa a má-fé após 30/03/2021.</li>
+    <li><b>Municípios</b> (se o cliente mora lá): Iranduba, <b>Lei 523/2023</b> (contrato não presencial com idoso, aposentado e pensionista: envio das condições por e-mail ou correio; proibição de telemarketing ativo; descumprimento é violação ao CDC, art. 5º) <a href="https://sapl.iranduba.am.leg.br/norma/301" target="_blank" rel="noopener">SAPL</a>; Manacapuru, <b>Lei 1.439/2023</b> (informação prévia de juros, encargos, parcela e comprometimento da renda da pessoa idosa ou com deficiência) <a href="https://sapl.manacapuru.am.leg.br/norma/5773" target="_blank" rel="noopener">SAPL</a> <span class="conferir">o p. único do art. 1º cita “Belo Horizonte”, erro de redação</span>. Não há lei específica de Manaus na base.</li></ul>`;
+  const rj = `<h4>Rio de Janeiro</h4><ul>
+    <li><b>TJRJ, Corregedoria-Geral</b>: fatores da Lei 6.899/81 com IPCA-E até a Lei 14.905/2024; depois, IPCA e taxa legal (Provimento CGJ 60/2024). <a href="https://www.tjrj.jus.br/web/cgj/servicos/fatores-correcao-monetaria" target="_blank" rel="noopener">tabela da CGJ</a></li>
+    <li><b>Lei estadual 4.896/2006</b> (red. Lei 10.948/2025): cadastro para bloquear ligações de telemarketing; <b>Lei 10.339/2024</b>: proíbe telemarketing automatizado. <span class="conferir">conferir texto</span></li>
+    <li>Não achei lei fluminense específica sobre refinanciamento de consignado; a tese se apoia na legislação federal.</li></ul>`;
+  return `<div class="fundamentos"><div><h4>Legislação federal</h4><ul>
+    <li><b>CDC, art. 42, parágrafo único</b>: repetição em dobro do que foi cobrado indevidamente.</li>
+    <li><b>CDC, arts. 6º, VIII, 14 e 39, III e IV</b>: inversão do ônus da prova; responsabilidade objetiva; fornecimento sem solicitação e aproveitamento da fragilidade do consumidor idoso.</li>
+    <li><b>Lei 10.820/2003, art. 6º</b> e <b>IN PRES/INSS 138/2022, art. 5º</b>: desconto em benefício só com autorização do titular. <span class="conferir">texto alterado várias vezes</span></li>
+    <li><b>CC, art. 205</b>: prescrição decenal (posição do escritório); CDC art. 27 como alternativa.</li>
+    <li><b>CC, arts. 389 e 406</b> (Lei 14.905/2024) e <b>Res. CMN 5.171/2024</b>: IPCA e taxa legal (BCB, série 29543), juros simples, piso zero.</li>
+    <li><b>CPC, art. 292, VI e VIII</b>: valor da causa = proveito econômico (dobro + dano moral). Com contrato ativo, o juiz pode corrigir de ofício (art. 292, § 3º).</li>
+    <li><b>STJ</b>: Súmulas 297, 479, 54 e 362; EAREsp 676.608/RS (modulação em 30/03/2021).</li>
+    <li><b>STJ, Tema 1.435</b> (afetado em 2026): dano moral presumido em descontos indevidos em benefício previdenciário. <span class="conferir">ver suspensão de processos</span> Tema 1.414 (cartão consignado) não trata de refinanciamento; Tema 1.328 foi cancelado.</li>
+    </ul></div><div>${trib === "TJRJ" ? rj + am.replace("<h4>Amazonas</h4>", "<h4>Amazonas (referência)</h4>") : am + rj.replace("<h4>Rio de Janeiro</h4>", "<h4>Rio de Janeiro (se a ação for lá)</h4>")}</div></div>`;
+}
+function renderResultado() {
+  const box = $("#resultado");
+  if (!R) { box.innerHTML = `<div class="vazio"><b>Sem dados ainda</b>Comece pelos documentos ou clique em “Ver exemplo” no topo.</div>`; $("#res-sub").textContent = ""; return; }
+  const t = R.totais, cfg = R.cfg;
+  const reg = cfg.regime === "lei14905" ? `${cfg.indiceAntes} + ${String(cfg.jurosAntes).replace(".", ",")}% a.m. até 08/2024; IPCA + taxa legal depois` : cfg.regime === "selic" ? "SELIC simples" : "sem atualização";
+  $("#res-sub").textContent = `${cfg.tribunal} · atualizado até ${M.dataBR(cfg.dataCalculo)} · ${reg}`;
+  $("#cab-impressao").innerHTML = `<div style="display:flex;justify-content:space-between;align-items:flex-end;border-bottom:2px solid #0B4A44;padding-bottom:8px;margin-bottom:12px">
+    <div><div style="font:600 12px var(--sans);letter-spacing:.14em;text-transform:uppercase;color:#735C14">Luís Albert Advocacia</div>
+    <div style="font:600 22px var(--serif);color:#0B4A44">Memória de cálculo · restituição de refinanciamento indevido</div></div>
+    <div style="text-align:right;font-size:12px;color:#3D4F63">${esc(S.cliente.nome || "")}<br>NB ${esc(S.cliente.nb || "—")} · réu: banco ${esc(cfg.bancoReu)}<br>Fontes: ${esc(S.fontes.hiscon ? "HISCON " + S.fontes.hiscon.nome : "dados digitados")}${S.fontes.hiscre ? ", HISCRE " + esc(S.fontes.hiscre.nome) : ""}</div></div>`;
+
+  const quadro = R.analises.flatMap((a) => a.refins.map((r) => ({ r, c: R.rec.contratos.find((x) => x.id === r.id) }))).filter((x) => !x.c.reconhecido);
+  const linhaMem = (m) => `<tr class="${m.prescrito ? "presc" : !m.impugnado ? "dev" : ""}"><td>${M.compBR(m.comp)}</td><td>${M.dataBR(m.data)}${m.dataPresumida ? "*" : ""}</td>
+    <td class="mono">${esc(m.rotulo)} · ${esc(m.contrato)}</td><td class="v">${numBR(m.descontado)}</td><td class="v">${m.impugnado ? numBR(m.deducao) : "—"}</td>
+    <td class="v">${m.impugnado ? numBR(m.indevido) : "—"}</td><td class="v">${m.fatorDobro ? "×" + m.fatorDobro : "—"}</td><td class="v">${m.base ? numBR(m.base) : "—"}</td>
+    <td class="v">${m.base ? m.fatorCorrecao.toFixed(6).replace(".", ",") : "—"}</td><td class="v">${m.base ? m.jurosPct.toFixed(4).replace(".", ",") + "%" : "—"}</td><td class="v">${m.base ? numBR(m.atualizado) : "—"}</td></tr>`;
+  const memImp = R.memoria;
+
+  box.innerHTML = `
+  <div class="kpis">
+    <div class="kpi"><span>Indébito</span><b>${brl(t.indevido)}</b><small>${t.n} desconto(s)${t.estimado ? ", estimados" : ""}</small></div>
+    <div class="kpi"><span>Restituição</span><b>${brl(t.dobro)}</b><small>${cfg.dobro === "modulacao" ? "dobro após 30/03/2021" : cfg.dobro === "dobro" ? "em dobro" : "simples"}</small></div>
+    <div class="kpi"><span>Atualizada</span><b>${brl(t.atualizado)}</b><small>correção ${brl(t.corrigido - t.dobro)} · juros ${brl(t.juros)}</small></div>
+    <div class="kpi destaque"><span>Valor da causa</span><b>${brl(t.valorCausa)}</b><small>dobro + dano moral ${brl(t.danoMoral)}</small></div>
+  </div>
+  ${t.dobro === 0 ? `<div class="aviso alerta" style="margin-bottom:16px">${ICONE.alerta}<span>Nenhum valor indevido descontado até agora: a parcela não mudou e o término original ainda não passou. Na peça, a restituição fica “a apurar em liquidação”. Parcelas vincendas indevidas projetadas: <b>${brl(t.vincendas)}</b> (${t.nVincendas} meses).</span></div>` : ""}
+
+  <div class="card"><h3>Descontos mês a mês</h3><p class="sub">Altura da barra = desconto do banco réu no mês.</p>${grafico(R)}</div>
+
+  <div class="card"><h3>Quadro dos contratos impugnados</h3><p class="sub">Somente contratos do banco réu: ${esc(cfg.bancoReu)}${(R.rec.contratos.find((c) => c.banco === cfg.bancoReu) || {}).bancoNome ? " · " + esc(R.rec.contratos.find((c) => c.banco === cfg.bancoReu).bancoNome) : ""}.</p>
+    <div class="tabela-wrap"><table><thead><tr><th>Contrato</th><th>Banco réu</th><th>Situação</th><th>Inclusão</th><th class="v">Parcela</th><th class="v">Qtde</th><th class="v">Restavam</th><th class="v">Acrescidas</th><th class="v">Valor acrescido</th><th class="v">Emprestado</th><th class="v">Liberado</th><th class="v">Sem destino</th></tr></thead>
+    <tbody>${quadro.length ? quadro.map(({ r, c }) => `<tr><td class="mono">${esc(r.rotulo)} · ${esc(c.contrato)}</td><td title="${esc(c.bancoNome || "")}">${esc(c.banco)}</td><td>${esc(c.situacao)}</td><td>${M.dataBR(c.inclusao)}</td>
+      <td class="v">${numBR(c.parcela)}</td><td class="v">${c.qtd ?? "—"}</td><td class="v">${r.restAntes ?? "—"}</td><td class="v"><b>${r.acrescidas ?? "—"}</b></td><td class="v">${numBR(r.valorAcrescido)}</td><td class="v">${numBR(c.emprestado)}</td>
+      <td class="v">${c.liberado ? numBR(c.liberado) : "0,00"}</td><td class="v">${numBR(r.semDestino)}</td></tr>`).join("") : `<tr><td colspan="12">Nenhum refinanciamento do banco réu.</td></tr>`}</tbody></table></div>
+    <p class="sub" style="margin:10px 0 0">Restavam = parcelas do contrato reconhecido entre a troca e o término original. Acrescidas = parcelas do refinanciamento − restavam. Sem destino = emprestado − valor pago − liberado.</p></div>
+
+  <div class="card"><h3>Restituição por contrato</h3><p class="sub">Tabela 5 do modelo.</p>
+    <div class="tabela-wrap"><table><thead><tr><th>Contrato</th><th>Competências</th><th class="v">Nº</th><th class="v">Parcela</th><th class="v">Descontado</th><th class="v">Dedução</th><th class="v">Indevido</th><th class="v">Restituição</th><th class="v">Atualizado</th></tr></thead>
+    <tbody>${R.porContrato.map((k) => `<tr><td class="mono">${esc(k.rotulo)} · ${esc(k.contrato)}</td><td>${M.compBR(k.comps[0])} a ${M.compBR(k.comps[k.comps.length - 1])}</td><td class="v">${k.n}</td><td class="v">${numBR(k.parcela)}</td><td class="v">${numBR(k.total)}</td><td class="v">${numBR(k.deducao)}</td><td class="v">${numBR(k.indevido)}</td><td class="v">${numBR(k.dobro)}</td><td class="v">${numBR(k.atualizado)}</td></tr>`).join("")}</tbody>
+    <tfoot><tr><td colspan="2">Total</td><td class="v">${t.n}</td><td></td><td class="v">${numBR(t.descontado)}</td><td class="v">${numBR(t.deducao)}</td><td class="v">${numBR(t.indevido)}</td><td class="v">${numBR(t.dobro)}</td><td class="v">${numBR(t.atualizado)}</td></tr></tfoot></table></div></div>
+
+  <div class="card"><details class="memoria" open><summary>Memória de cálculo competência a competência (${memImp.length} linhas)</summary>
+    <div class="tabela-wrap" style="max-height:520px;margin-top:10px"><table><thead><tr><th>Comp.</th><th>Pagamento</th><th>Contrato</th><th class="v">Descontado</th><th class="v">Dedução</th><th class="v">Indevido</th><th class="v">Fator</th><th class="v">Base</th><th class="v">Correção</th><th class="v">Juros</th><th class="v">Atualizado</th></tr></thead>
+    <tbody>${memImp.map(linhaMem).join("")}</tbody>
+    <tfoot><tr><td colspan="3">Total</td><td class="v">${numBR(t.descontado)}</td><td class="v">${numBR(t.deducao)}</td><td class="v">${numBR(t.indevido)}</td><td></td><td class="v">${numBR(t.dobro)}</td><td></td><td class="v">${numBR(t.juros)}</td><td class="v">${numBR(t.atualizado)}</td></tr></tfoot></table></div>
+    <p class="sub" style="margin:10px 0 0">Dedução = parcela do contrato reconhecido, devida até o término original. Fator ×1 = restituição simples, ×2 = em dobro. Correção = fator acumulado do mês do pagamento ao mês anterior ao cálculo. Juros simples pro rata die. ${memImp.some((m) => m.dataPresumida) ? "* Data presumida: dia 5 do mês seguinte à competência (sem HISCRE)." : ""} Linhas em cinza: parte devida ou contrato não impugnado; riscadas: prescritas.</p></details></div>
+
+  <div class="card"><h3>Fundamentação</h3><p class="sub">Normas conferidas nas bases do escritório (AM) e nas fontes oficiais. Os itens marcados pedem conferência antes do protocolo.</p>${fundamentos(cfg.tribunal)}</div>
+
+  <div class="card nao-imprimir"><h3>Campos da inicial</h3><p class="sub">Para o modelo “Inicial de Refinanciamento Indevido – cadeia HISCON”. Copie e cole no preenchimento.</p>
+    <pre class="tokens" id="tokens">${Object.entries(Object.assign({}, R.tokens, { NB: S.cliente.nb || "", NOME_AUTOR: S.cliente.nome || "", ESPECIE_BENEFICIO: S.cliente.especie || "" })).map(([k, v]) => `<b>[${k}]</b> ${esc(v || "—")}`).join("\n")}</pre>
+    <div class="linha-botoes" style="margin-top:10px"><button type="button" class="btn peq sec" id="b-copiar">Copiar campos</button><span id="copiado" class="indices" aria-live="polite"></span></div></div>
+
+  <div class="card"><h3>Notas da conferência</h3><div class="avisos">${R.avisos.length ? R.avisos.map((a) => `<div class="aviso ${a.nivel}">${ICONE[a.nivel]}<span>${esc(a.texto)}</span></div>`).join("") : `<div class="aviso info">${ICONE.info}<span>Sem pendências.</span></div>`}</div></div>`;
+  const bc = $("#b-copiar");
+  bc && bc.addEventListener("click", async () => { await navigator.clipboard.writeText($("#tokens").innerText); $("#copiado").textContent = "Copiado."; setTimeout(() => ($("#copiado").textContent = ""), 2000); });
+}
+
+// ------------------------------------------------------------ exportar
+lig("#b-imprimir", "click", () => { const d = $("details.memoria"); if (d) d.open = true; window.print(); });
+const baixar = (nome, tipo, conteudo) => { const a = document.createElement("a"); a.href = URL.createObjectURL(new Blob([conteudo], { type: tipo })); a.download = nome; a.click(); setTimeout(() => URL.revokeObjectURL(a.href), 2000); };
+const nomeArq = (ext) => `refin_${(S.cliente.nome || "caso").replace(/[^\p{L}\p{N}]+/gu, "_").slice(0, 40)}_${S.cfg.dataCalculo}.${ext}`;
+lig("#b-csv", "click", () => {
+  if (!R) return;
+  const n = (v) => (v === null || v === undefined) ? "" : String(v).replace(".", ",");
+  const cab = "competencia;data_pagamento;contrato;rotulo;impugnado;prescrito;descontado;deducao;indevido;fator_dobro;base;fator_correcao;juros_pct;juros;atualizado";
+  const linhas = R.memoria.map((m) => [M.compBR(m.comp), M.dataBR(m.data), m.contrato, m.rotulo, m.impugnado ? "sim" : "não", m.prescrito ? "sim" : "não", n(m.descontado), n(m.deducao), n(m.indevido), m.fatorDobro, n(m.base), n(m.fatorCorrecao.toFixed(8)), n(m.jurosPct.toFixed(6)), n(m.juros), n(m.atualizado)].join(";"));
+  baixar(nomeArq("csv"), "text/csv;charset=utf-8", "﻿" + [cab, ...linhas].join("\r\n"));
+});
+lig("#b-salvar", "click", () => baixar(nomeArq("json"), "application/json", JSON.stringify(S, null, 2)));
+lig("#b-abrir", "click", () => $("#f-caso").click());
+lig("#f-caso", "change", async (e) => {
+  const f = e.target.files[0]; if (!f) return;
+  try { const s = JSON.parse(await f.text()); if (!s.cfg || !Array.isArray(s.contratos)) throw new Error("arquivo não é um caso"); S = Object.assign(novoEstado(), s); iniciarTela(); ir("resultado"); }
+  catch (err) { alertaTopo("erro", "Não abri o caso: " + err.message); }
+});
+lig("#b-novo", "click", () => {
+  if (S.contratos.length && !confirm("Apagar o caso atual deste navegador e começar outro?")) return;
+  localStorage.removeItem(CHAVE); S = novoEstado(); avisosExtras = [];
+  ["hiscon", "hiscre"].forEach((id) => { $("#d-" + id).classList.remove("ok"); $("#e-" + id).textContent = ""; $("#f-" + id).value = ""; });
+  iniciarTela(); ir("documentos");
+});
+lig("#b-exemplo", "click", () => {
+  const ex = globalThis.CASO_EXEMPLO;
+  S = novoEstado();
+  S.cliente = Object.assign({}, ex.cliente);
+  Object.assign(S.cfg, ex.cfg);
+  S.contratos = ex.contratos.map((c, i) => M.normContrato(c, i));
+  S.fontes = { exemplo: true };
+  avisosExtras = [{ nivel: "info", texto: "Caso fictício de demonstração: três contratos do banco 389 (um original e dois refinanciamentos sem liberação) e um contrato isolado do 033." }];
+  iniciarTela(); ir("resultado");
+});
+
+// ------------------------------------------------------------ índices ao vivo (BCB, com CORS)
+async function atualizarIndices() {
+  const codigos = { IPCA: 433, INPC: 188, "IPCA-E": 10764, SELIC: 4390, TAXA_LEGAL: 29543 };
+  const ctrl = new AbortController(); const to = setTimeout(() => ctrl.abort(), 9000);
+  try {
+    let maisNovo = "";
+    await Promise.all(Object.entries(codigos).map(async ([nome, cod]) => {
+      const r = await fetch(`https://api.bcb.gov.br/dados/serie/bcdata.sgs.${cod}/dados?formato=json&dataInicial=01/01/2026`, { signal: ctrl.signal });
+      if (!r.ok) throw new Error(r.status);
+      for (const d of await r.json()) {
+        const [, mm, aa] = d.data.split("/"); const c = `${aa}-${mm}`;
+        IDX.series[nome][c] = Number(d.valor);
+        if (nome === "IPCA" && c > maisNovo) maisNovo = c;
+      }
+    }));
+    $("#st-indices").textContent = `Índices atualizados agora pelo Banco Central (IPCA até ${M.compBR(maisNovo)}).`;
+    recalcular(false);
+  } catch {
+    $("#st-indices").textContent = "Índices: cópia de 24/11/2026 (o Banco Central não respondeu).";
+  } finally { clearTimeout(to); }
+}
+
+// ------------------------------------------------------------ início
+function iniciarTela() {
+  aplicarTribunal(S.cfg.tribunal || "TJAM");
+  preencherParametros(); renderContratos(); recalcular();
+  if (S.fontes.hiscon) { $("#d-hiscon").classList.add("ok"); $("#e-hiscon").textContent = `✓ ${S.fontes.hiscon.nome} (lido antes)`; }
+  if (S.fontes.hiscre) { $("#d-hiscre").classList.add("ok"); $("#e-hiscre").textContent = `✓ ${S.fontes.hiscre.nome} (lido antes)`; }
+}
+iniciarTela();
+atualizarIndices();
+</script>
+</body>
+</html>
