@@ -51,5 +51,5 @@ Nenhum documento sai do computador: pdf.js e Tesseract rodam no navegador. O cas
 ## Antes de protocolar
 
 - Confira o HISCON e o HISCRE linha a linha. A leitura automática sempre passa pela conferência na tela.
-- Confira o status dos Temas 1.414 e 1.435 do STJ e a portaria de correção do TJAM; os itens "conferir" estão marcados na seção Fundamentação.
+- Confira o status dos Temas 1.414 e 1.435 do STJ e a portaria de correção do TJAM; antes do protocolo.
 - Nunca use negação categórica de contratação na peça (regra do modelo do escritório).

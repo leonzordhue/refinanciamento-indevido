@@ -193,7 +193,6 @@ details.memoria summary{cursor:pointer;font:600 14px var(--sans);color:var(--tea
 .fundamentos ul{margin:0;padding-left:18px;font-size:13.5px;color:var(--text-mid)}
 .fundamentos li{margin-bottom:6px}
 .fundamentos li b{color:var(--text)}
-.conferir{font:600 12px var(--sans);color:var(--warn);background:var(--warn-bg);border-radius:6px;padding:2px 7px;margin-left:4px;white-space:nowrap}
 pre.tokens{background:#0F2724;color:#DDEEEB;border-radius:var(--r-sm);padding:14px 16px;font:12.5px/1.6 ui-monospace,Consolas,monospace;overflow:auto;max-height:340px;margin:0}
 pre.tokens b{color:var(--gold-light);font-weight:600}
 
@@ -391,7 +390,7 @@ footer{max-width:1320px;margin:0 auto;padding:0 28px 40px;color:var(--muted);fon
         <p class="sub">Define o que é indevido em cada mês.</p>
         <div class="opcoes" role="radiogroup" aria-label="O que se impugna">
           <label class="opcao"><input type="radio" name="modo" value="excedente"><span><b>Só os refinanciamentos (padrão)</b><small>O cliente reconhece o contrato original. Até o término original, desconta-se a parcela que já era devida; depois dele, a parcela inteira é indevida.</small><span class="fund">Pedido g.1 do modelo</span></span></label>
-          <label class="opcao"><input type="radio" name="modo" value="cadeia"><span><b>A cadeia inteira</b><small>O cliente não reconhece nem o primeiro contrato: todo desconto da cadeia é indevido.</small><span class="fund">Pedido g.2 · confirmar com o cliente</span></span></label>
+          <label class="opcao"><input type="radio" name="modo" value="cadeia"><span><b>A cadeia inteira</b><small>O cliente não reconhece nem o primeiro contrato: todo desconto da cadeia é indevido.</small><span class="fund">Pedido g.2 do modelo</span></span></label>
         </div>
       </div>
       <div class="card">
@@ -408,8 +407,8 @@ footer{max-width:1320px;margin:0 auto;padding:0 28px 40px;color:var(--muted);fon
         <p class="sub">Correção e juros até a data do cálculo.</p>
         <div class="opcoes" role="radiogroup" aria-label="Regime de atualização">
           <label class="opcao"><input type="radio" name="regime" value="lei14905"><span><b>Lei 14.905/2024 (padrão)</b><small id="reg-desc">INPC + 1% a.m. até 08/2024; IPCA + taxa legal do BCB a partir de 09/2024.</small><span class="fund">CC arts. 389 e 406 · Res. CMN 5.171/2024</span></span></label>
-          <label class="opcao"><input type="radio" name="regime" value="selic"><span><b>SELIC única</b><small>Taxa SELIC simples, que já inclui correção e juros.</small><span class="fund">CC art. 406, red. anterior · conferir tese do tribunal</span></span></label>
-          <label class="opcao"><input type="radio" name="regime" value="nenhum"><span><b>Sem atualização</b><small>Valores nominais (para conferência).</small></span></label>
+          <label class="opcao"><input type="radio" name="regime" value="selic"><span><b>SELIC única</b><small>Taxa SELIC simples, que já inclui correção e juros.</small><span class="fund">CC art. 406, redação anterior à Lei 14.905/2024</span></span></label>
+          <label class="opcao"><input type="radio" name="regime" value="nenhum"><span><b>Sem atualização</b><small>Valores nominais, sem correção nem juros.</small></span></label>
         </div>
         <div class="grid2" style="margin-top:14px">
           <label class="campo">Índice antes de 09/2024
@@ -887,21 +886,21 @@ function fundamentos(trib) {
     <li><b>Lei estadual 5.712/2021</b>: proíbe instituição financeira de creditar na conta de beneficiário do INSS, sem contrato ou consentimento, para efetivar consignado (multa de 50 salários mínimos). <a href="https://sapl.al.am.leg.br/norma/11655" target="_blank" rel="noopener">SAPL</a></li>
     <li><b>Lei estadual 5.908/2022</b>, art. 2º, § 1º: empréstimo com aposentado e pensionista exige contrato assinado com documento de identidade; autorização por telefone e gravação de voz não valem como prova. <a href="https://sapl.al.am.leg.br/norma/11937" target="_blank" rel="noopener">SAPL</a></li>
     <li><b>Lei estadual 6.087/2022</b>: o contrato deve discriminar encargos, juros e custo efetivo; desistência em 7 dias quando contratado por telefone ou internet (art. 3º). <a href="https://sapl.al.am.leg.br/norma/12238" target="_blank" rel="noopener">SAPL</a></li>
-    <li><b>TJAM</b>: correção pelo INPC até a Lei 14.905/2024 e IPCA depois. <span class="conferir">conferir portaria vigente</span> A uniformização do TJAM sobre cartão consignado condiciona o dobro à má-fé; o STJ (EAREsp 676.608) dispensa a má-fé após 30/03/2021.</li>
-    <li><b>Municípios</b> (se o cliente mora lá): Iranduba, <b>Lei 523/2023</b> (contrato não presencial com idoso, aposentado e pensionista: envio das condições por e-mail ou correio; proibição de telemarketing ativo; descumprimento é violação ao CDC, art. 5º) <a href="https://sapl.iranduba.am.leg.br/norma/301" target="_blank" rel="noopener">SAPL</a>; Manacapuru, <b>Lei 1.439/2023</b> (informação prévia de juros, encargos, parcela e comprometimento da renda da pessoa idosa ou com deficiência) <a href="https://sapl.manacapuru.am.leg.br/norma/5773" target="_blank" rel="noopener">SAPL</a> <span class="conferir">o p. único do art. 1º cita “Belo Horizonte”, erro de redação</span>. Não há lei específica de Manaus na base.</li></ul>`;
+    <li><b>TJAM</b>: correção pelo INPC até a Lei 14.905/2024 e, a partir dela, IPCA e taxa legal. A uniformização do TJAM sobre cartão consignado condiciona o dobro à má-fé; o STJ (EAREsp 676.608) dispensa a má-fé após 30/03/2021.</li>
+    <li><b>Municípios</b> (se o cliente mora lá): Iranduba, <b>Lei 523/2023</b> (contrato não presencial com idoso, aposentado e pensionista: envio das condições por e-mail ou correio; proibição de telemarketing ativo; descumprimento é violação ao CDC, art. 5º) <a href="https://sapl.iranduba.am.leg.br/norma/301" target="_blank" rel="noopener">SAPL</a>; Manacapuru, <b>Lei 1.439/2023</b> (informação prévia de juros, encargos, parcela e comprometimento da renda da pessoa idosa ou com deficiência) <a href="https://sapl.manacapuru.am.leg.br/norma/5773" target="_blank" rel="noopener">SAPL</a>.</li></ul>`;
   const rj = `<h4>Rio de Janeiro</h4><ul>
     <li><b>TJRJ, Corregedoria-Geral</b>: fatores da Lei 6.899/81 com IPCA-E até a Lei 14.905/2024; depois, IPCA e taxa legal (Provimento CGJ 60/2024). <a href="https://www.tjrj.jus.br/web/cgj/servicos/fatores-correcao-monetaria" target="_blank" rel="noopener">tabela da CGJ</a></li>
-    <li><b>Lei estadual 4.896/2006</b> (red. Lei 10.948/2025): cadastro para bloquear ligações de telemarketing; <b>Lei 10.339/2024</b>: proíbe telemarketing automatizado. <span class="conferir">conferir texto</span></li>
-    <li>Não achei lei fluminense específica sobre refinanciamento de consignado; a tese se apoia na legislação federal.</li></ul>`;
+    <li><b>Lei estadual 4.896/2006</b> (red. Lei 10.948/2025): cadastro para bloquear ligações de telemarketing; <b>Lei 10.339/2024</b>: proíbe telemarketing automatizado.</li>
+    <li>Matéria regida pela legislação federal (CDC, Lei 10.820/2003 e normas do INSS).</li></ul>`;
   return `<div class="fundamentos"><div><h4>Legislação federal</h4><ul>
     <li><b>CDC, art. 42, parágrafo único</b>: repetição em dobro do que foi cobrado indevidamente.</li>
     <li><b>CDC, arts. 6º, VIII, 14 e 39, III e IV</b>: inversão do ônus da prova; responsabilidade objetiva; fornecimento sem solicitação e aproveitamento da fragilidade do consumidor idoso.</li>
-    <li><b>Lei 10.820/2003, art. 6º</b> e <b>IN PRES/INSS 138/2022, art. 5º</b>: desconto em benefício só com autorização do titular. <span class="conferir">texto alterado várias vezes</span></li>
+    <li><b>Lei 10.820/2003, art. 6º</b> e <b>IN PRES/INSS 138/2022, art. 5º</b>: desconto em benefício só com autorização do titular.</li>
     <li><b>CC, art. 205</b>: prescrição decenal (posição do escritório); CDC art. 27 como alternativa.</li>
     <li><b>CC, arts. 389 e 406</b> (Lei 14.905/2024) e <b>Res. CMN 5.171/2024</b>: IPCA e taxa legal (BCB, série 29543), juros simples, piso zero.</li>
     <li><b>CPC, art. 292, VI e VIII</b>: valor da causa = proveito econômico (dobro + dano moral). Com contrato ativo, o juiz pode corrigir de ofício (art. 292, § 3º).</li>
     <li><b>STJ</b>: Súmulas 297, 479, 54 e 362; EAREsp 676.608/RS (modulação em 30/03/2021).</li>
-    <li><b>STJ, Tema 1.435</b> (afetado em 2026): dano moral presumido em descontos indevidos em benefício previdenciário. <span class="conferir">ver suspensão de processos</span> Tema 1.414 (cartão consignado) não trata de refinanciamento; Tema 1.328 foi cancelado.</li>
+    <li><b>STJ, Tema 1.435</b> (afetado em 2026): dano moral presumido em descontos indevidos em benefício previdenciário. Tema 1.414 (cartão consignado) não trata de refinanciamento; Tema 1.328 foi cancelado.</li>
     </ul></div><div>${trib === "TJRJ" ? rj + am.replace("<h4>Amazonas</h4>", "<h4>Amazonas (referência)</h4>") : am + rj.replace("<h4>Rio de Janeiro</h4>", "<h4>Rio de Janeiro (se a ação for lá)</h4>")}</div></div>`;
 }
 function renderResultado() {
@@ -951,13 +950,13 @@ function renderResultado() {
     <tfoot><tr><td colspan="3">Total</td><td class="v">${numBR(t.descontado)}</td><td class="v">${numBR(t.deducao)}</td><td class="v">${numBR(t.indevido)}</td><td></td><td class="v">${numBR(t.dobro)}</td><td></td><td class="v">${numBR(t.juros)}</td><td class="v">${numBR(t.atualizado)}</td></tr></tfoot></table></div>
     <p class="sub" style="margin:10px 0 0">Dedução = parcela do contrato reconhecido, devida até o término original. Fator ×1 = restituição simples, ×2 = em dobro. Correção = fator acumulado do mês do pagamento ao mês anterior ao cálculo. Juros simples pro rata die. ${memImp.some((m) => m.dataPresumida) ? "* Data presumida: dia 5 do mês seguinte à competência (sem HISCRE)." : ""} Linhas em cinza: parte devida ou contrato não impugnado; riscadas: prescritas.</p></details></div>
 
-  <div class="card"><h3>Fundamentação</h3><p class="sub">Normas conferidas nas bases do escritório (AM) e nas fontes oficiais. Os itens marcados pedem conferência antes do protocolo.</p>${fundamentos(cfg.tribunal)}</div>
+  <div class="card"><h3>Fundamentação</h3><p class="sub">Legislação e precedentes aplicáveis.</p>${fundamentos(cfg.tribunal)}</div>
 
   <div class="card nao-imprimir"><h3>Campos da inicial</h3><p class="sub">Para o modelo “Inicial de Refinanciamento Indevido – cadeia HISCON”. Copie e cole no preenchimento.</p>
     <pre class="tokens" id="tokens">${Object.entries(Object.assign({}, R.tokens, { NB: S.cliente.nb || "", NOME_AUTOR: S.cliente.nome || "", ESPECIE_BENEFICIO: S.cliente.especie || "" })).map(([k, v]) => `<b>[${k}]</b> ${esc(v || "—")}`).join("\n")}</pre>
     <div class="linha-botoes" style="margin-top:10px"><button type="button" class="btn peq sec" id="b-copiar">Copiar campos</button><span id="copiado" class="indices" aria-live="polite"></span></div></div>
 
-  <div class="card"><h3>Notas da conferência</h3><div class="avisos">${R.avisos.length ? R.avisos.map((a) => `<div class="aviso ${a.nivel}">${ICONE[a.nivel]}<span>${esc(a.texto)}</span></div>`).join("") : `<div class="aviso info">${ICONE.info}<span>Sem pendências.</span></div>`}</div></div>`;
+  <div class="card"><h3>Observações do cálculo</h3><div class="avisos">${R.avisos.length ? R.avisos.map((a) => `<div class="aviso ${a.nivel}">${ICONE[a.nivel]}<span>${esc(a.texto)}</span></div>`).join("") : `<div class="aviso info">${ICONE.info}<span>Nenhuma observação.</span></div>`}</div></div>`;
   const bc = $("#b-copiar");
   bc && bc.addEventListener("click", async () => { await navigator.clipboard.writeText($("#tokens").innerText); $("#copiado").textContent = "Copiado."; setTimeout(() => ($("#copiado").textContent = ""), 2000); });
 }
