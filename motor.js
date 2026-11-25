@@ -62,6 +62,8 @@
     const s = String(v).trim();
     let m = s.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/);
     if (m) return `${m[3]}-${m[2].padStart(2, "0")}-${m[1].padStart(2, "0")}`;
+    m = s.match(/^(\d{1,2})\/(\d{1,2})\/(\d{2})$/); // HISCON novo: dd/mm/aa
+    if (m) return `20${m[3]}-${m[2].padStart(2, "0")}-${m[1].padStart(2, "0")}`;
     m = s.match(/^(\d{4})-(\d{2})-(\d{2})/);
     if (m) return `${m[1]}-${m[2]}-${m[3]}`;
     return null;
@@ -157,6 +159,11 @@
         const pa = (a.parcela !== null && c.parcela !== null && Math.abs(a.parcela - c.parcela) < 0.005) ? 0 : 1;
         const pb = (b.parcela !== null && c.parcela !== null && Math.abs(b.parcela - c.parcela) < 0.005) ? 0 : 1;
         if (pa !== pb) return pa - pb;
+        // consolidação (2 contratos quitados no mesmo dia): segue o de parcela mais próxima da nova
+        if (a.parcela !== null && b.parcela !== null && c.parcela !== null) {
+          const dif = Math.abs(a.parcela - c.parcela) - Math.abs(b.parcela - c.parcela);
+          if (Math.abs(dif) >= 0.005) return dif;
+        }
         const da = Math.abs(diasEntre(a.exclusao, c.inclusao)), db = Math.abs(diasEntre(b.exclusao, c.inclusao));
         if (da !== db) return da - db;
         return Math.abs(numero(a.contrato) - numero(c.contrato)) - Math.abs(numero(b.contrato) - numero(c.contrato));
@@ -165,6 +172,9 @@
       if (usados.has(escolhido.id)) avisos.push({ nivel: "alerta", texto: `O contrato ${escolhido.contrato} aparece como quitado por mais de um refinanciamento (${porId[usados.get(escolhido.id)].contrato} e ${c.contrato}). Confira no HISCON.` });
       anterior[c.id] = escolhido.id;
       usados.set(escolhido.id, c.id);
+      // refinanciamento que quitou mais de um contrato no mesmo dia: a cadeia segue um só; os outros ficam avulsos
+      const outros = cands.filter((p) => p !== escolhido && !usados.has(p.id));
+      if (outros.length) avisos.push({ nivel: "alerta", texto: `Refinanciamento ${c.contrato} quitou mais de um contrato em ${dataBR(c.inclusao)}: a cadeia segue ${escolhido.contrato}; ${outros.map((p) => p.contrato).join(", ")} ficou fora da cadeia. Confira se o valor pago inclui esse saldo.` });
     }
 
     // monta as cadeias a partir das pontas (quem não é anterior de ninguém)
@@ -583,11 +593,127 @@
   const RE_MOEDA = /R?\$?\s?\d{1,3}(?:\.\d{3})*,\d{2}/g;
   const RE_CONTRATO = /^[A-Z0-9][A-Z0-9.\-\/]{5,}$/i;
 
+  // ---- leitor do HISCON atual do Meu INSS: cabeçalho em 3–4 linhas com palavras partidas
+  // ("CONTRA/TO", "INCLUS/ÃO") e células quebradas ("290969/4511", "05/02/2/6", "R$19.38/8,64").
+  const semAcento = (s) => String(s).normalize("NFD").replace(/[̀-ͯ]/g, "").toUpperCase();
+  function nomeColuna(rotulo) {
+    const t = semAcento(rotulo).replace(/[^A-Z]/g, "");
+    if (/SUSPENS|REATIV|CET|TAXA|JUROS|IOF/.test(t)) return null;
+    if (t.includes("CONTRATO")) return "contrato";
+    if (t.endsWith("BANCO")) return "banco";
+    if (t.startsWith("SITUA")) return "situacao";
+    if (t.includes("MOTIVO")) return "motivo";
+    if (t.includes("ORIGEM")) return t.includes("EXCLUS") ? "origemExclusao" : "origem";
+    if (t.includes("INCLUS")) return "inclusao";
+    if (t.includes("INICIO")) return "inicio";
+    if (/(^|COMPETENCIA)FIM/.test(t)) return "fim";
+    if (t.includes("PARCELAS") || t.startsWith("QTD")) return "qtd";
+    if (t.endsWith("PARCELA")) return "parcela";
+    if (t.includes("EMPRESTADO")) return "emprestado";
+    if (t.includes("LIBERADO")) return "liberado";
+    if (t.includes("PAGO")) return "pago";
+    if (t.includes("PRIMEIRO")) return "primeiro";
+    if (t.includes("EXCLUS")) return "exclusao";
+    return null;
+  }
+  // junta pedaços de uma célula: quebra no meio da palavra/número cola; entre palavras, espaço
+  function juntarCelula(ws, tol) {
+    let s = "", yAnt = null;
+    for (const w of ws) {
+      if (yAnt === null) s = w.t;
+      else if (Math.abs(w.y - yAnt) <= tol) s += " " + w.t;
+      else s += (/^[a-zà-ú\d,.]/.test(w.t) || /[\d$.,\/]$/.test(s) ? "" : " ") + w.t;
+      yAnt = w.y;
+    }
+    return s;
+  }
+  function lerHisconTabelas(linhas, tol) {
+    const out = [];
+    const RE_TITULO = /CONTRATOS\s+(ATIVOS|EXCLU)|EMPR[EÉ]STIMOS|CART[AÃ]O/i;
+    const ehCab = (l) => l.ws.every((w) => !/[a-zà-ú\d]/.test(w.t));
+    let secao = "", pular = false, i = 0;
+    while (i < linhas.length) {
+      const l = linhas[i], texto = l.ws.map((w) => w.t).join(" ");
+      if (/CART[AÃ]O/i.test(texto) && ehCab(l)) pular = true;
+      else if (/EMPR[EÉ]STIMOS\s+BANC/i.test(texto)) pular = false;
+      if (/contratos?\s+ativos/i.test(texto)) secao = "Ativo";
+      if (/exclu[ií]dos?\s+e\s+encerrados/i.test(texto)) secao = "Excluído";
+      if (pular || RE_TITULO.test(texto) || !ehCab(l) || !l.ws.some((w) => /^(CONTRA|BANCO|SITUA|ORIGEM|COMPET)/i.test(w.t))) { i++; continue; }
+      // bloco do cabeçalho: linhas seguidas só com maiúsculas, na mesma página
+      const cabW = [];
+      let j = i;
+      while (j < linhas.length && linhas[j].p === l.p && ehCab(linhas[j]) && !RE_TITULO.test(linhas[j].ws.map((w) => w.t).join(" "))) { cabW.push(...linhas[j].ws); j++; }
+      const fimCab = Math.max(...cabW.map((w) => w.y + (w.h || 8) / 2));
+      // tira os títulos que cobrem várias colunas ("COMPETÊNCIA", "VALOR", "DATA")
+      const dentro = (a, b) => { const c = b.x + (b.w || 0) / 2; return c >= a.x - 1 && c <= a.x + (a.w || 0) + 1; };
+      const folhas = cabW.filter((a) => {
+        const abaixo = cabW.filter((b) => b !== a && b.y > a.y + tol && dentro(a, b));
+        return !abaixo.some((b) => abaixo.some((c) => c.x > b.x + (b.w || 0) + 1));
+      });
+      // agrupa as folhas empilhadas na mesma coluna
+      const grupos = [];
+      for (const w of folhas.slice().sort((a, b) => a.x - b.x)) {
+        const g = grupos.find((g) => g.ws.some((v) => dentro(v, w) || dentro(w, v)));
+        if (g) g.ws.push(w); else grupos.push({ ws: [w] });
+      }
+      const cols = [];
+      for (const g of grupos) {
+        g.ws.sort((a, b) => a.y - b.y || a.x - b.x);
+        const nome = nomeColuna(g.ws.map((w) => w.t).join(""));
+        const x0 = Math.min(...g.ws.map((w) => w.x)), x1 = Math.max(...g.ws.map((w) => w.x + (w.w || 0)));
+        cols.push({ nome, x0, x1 });
+      }
+      const tem = (n) => cols.some((c) => c.nome === n);
+      if (!tem("contrato") || !tem("inicio")) { i = j; continue; }
+      // linhas de dados até a nota de rodapé, outro título ou outra página
+      const dados = [];
+      let k = j;
+      for (; k < linhas.length; k++) {
+        const t = linhas[k].ws.map((w) => w.t).join(" ");
+        if (linhas[k].p !== l.p || /^\*|comprometem a margem|t[ií]tulo de d[ií]vida/i.test(t) || RE_TITULO.test(t) || (ehCab(linhas[k]) && linhas[k].ws.length >= 3 && /^(CONTRA|BANCO|SITUA|ORIGEM|COMPET)/.test(t))) break;
+        dados.push(...linhas[k].ws);
+      }
+      const colDe = (w) => {
+        const cx = w.x + (w.w || 0) / 2;
+        let melhor = null, dist = Infinity;
+        for (const c of cols) { const d = cx < c.x0 ? c.x0 - cx : cx > c.x1 ? cx - c.x1 : 0; if (d < dist) { dist = d; melhor = c; } }
+        return melhor;
+      };
+      // cada contrato tem uma competência de início numa linha só: ela marca o meio da linha da tabela
+      const ancoras = [];
+      for (const w of dados) if (colDe(w).nome === "inicio" && /^\d{2}\/\d{4}$/.test(w.t) && !ancoras.some((y) => Math.abs(y - w.y) <= tol)) ancoras.push(w.y);
+      ancoras.sort((a, b) => a - b);
+      // divisa entre duas linhas da tabela = maior vão vertical entre as palavras (células têm alturas diferentes)
+      const divisa = (a, b) => {
+        const ys = [a, ...dados.map((w) => w.y).filter((v) => v > a && v < b), b].sort((p, q) => p - q);
+        let melhor = (a + b) / 2, vao = -1;
+        for (let n = 1; n < ys.length; n++) if (ys[n] - ys[n - 1] > vao) { vao = ys[n] - ys[n - 1]; melhor = (ys[n] + ys[n - 1]) / 2; }
+        return melhor;
+      };
+      const cortes = ancoras.slice(1).map((y, n) => divisa(ancoras[n], y));
+      ancoras.forEach((y, n) => {
+        const ini = n ? cortes[n - 1] : fimCab;
+        const fim = n < ancoras.length - 1 ? cortes[n] : y + (y - ini) + tol;
+        const cel = {};
+        for (const w of dados.filter((w) => w.y > ini && w.y <= fim).sort((a, b) => a.y - b.y || a.x - b.x)) {
+          const c = colDe(w);
+          if (c.nome) (cel[c.nome] = cel[c.nome] || []).push(w);
+        }
+        const r = { _secao: secao };
+        for (const [nome, ws] of Object.entries(cel)) r[nome] = juntarCelula(ws, tol);
+        if (/\d{4,}/.test(r.contrato || "")) { r.contrato = r.contrato.replace(/\s+/g, ""); out.push(r); }
+      });
+      i = k;
+    }
+    return out;
+  }
+
   function lerHisconPalavras(palavras) {
     const avisos = [];
     if (!palavras.length) return { contratos: [], avisos: [{ nivel: "erro", texto: "O PDF não tem texto legível." }] };
     const altMed = palavras.reduce((s, w) => s + (w.h || 8), 0) / palavras.length;
     const linhas = agruparLinhas(palavras, altMed * 0.45);
+    const novo = lerHisconTabelas(linhas, altMed * 0.45);
     const out = [];
     let cab = null, atual = null, secao = "", linhasCab = 0;
     const addCols = (ws) => {
@@ -636,21 +762,25 @@
         for (const [k, v] of Object.entries(celulas)) atual[k] = (atual[k] ? atual[k] + " " : "") + v;
       }
     }
-    const contratos = out.map((r, i) => {
+    const RE_DIA = /\d{2}\/\d{2}\/(?:\d{4}|\d{2})(?!\d)/;
+    const contratos = (novo.length ? novo : out).map((r, i) => {
       const pega = (k, re) => { const m = String(r[k] || "").match(re); return m ? m[0] : ""; };
       const moeda = (k) => { const m = String(r[k] || "").match(RE_MOEDA); return m ? m[0] : ""; };
+      // o motivo ("Exclusão por refinanciamento") vale mais que a coluna de origem da exclusão
+      const motivo = String(r.motivo || "");
+      const origemExclusao = /refinanc/i.test(motivo) ? "refin" : /portab/i.test(motivo) ? "port" : r.origemExclusao || "";
       return normContrato({
         contrato: String(r.contrato || "").split(" ")[0],
         banco: String(r.banco || "").trim(),
         situacao: r.situacao || r._secao,
         origem: r.origem || "",
-        inclusao: pega("inclusao", /\d{2}\/\d{2}\/\d{4}/),
+        inclusao: pega("inclusao", RE_DIA),
         inicio: pega("inicio", /\d{2}\/\d{4}/),
         fim: pega("fim", /\d{2}\/\d{4}/),
         qtd: (String(r.qtd || "").match(/\d+/) || [""])[0],
         parcela: moeda("parcela"), emprestado: moeda("emprestado"), liberado: moeda("liberado"), pago: moeda("pago"),
-        exclusao: pega("exclusao", /\d{2}\/\d{2}\/\d{4}/),
-        origemExclusao: r.origemExclusao || "",
+        exclusao: pega("exclusao", RE_DIA),
+        origemExclusao,
         motivo: r.motivo || "",
       }, i);
     });
@@ -683,8 +813,10 @@
     for (const lin of linhas) {
       const l = lin.trim();
       if (!l) continue;
-      const mc = l.match(/\b(0[1-9]|1[0-2])\/((?:19|20)\d{2})\b(?!\/)/);
+      const mc = l.match(/(?<![\d\/])(0[1-9]|1[0-2])\/((?:19|20)\d{2})\b(?!\/)/); // mm/aaaa solto, não o fim de dd/mm/aaaa
       const md = l.match(/\b(\d{2}\/\d{2}\/\d{4})\b/);
+      // "Compet. Inicial/Final" é o cabeçalho que se repete em cada página: não muda a competência corrente
+      if (/compet\.?\s*(inicial|final)/i.test(l)) continue;
       if (/compet/i.test(l) || (mc && md && !/\b216\b/.test(l))) {
         if (mc) comp = `${mc[2]}-${mc[1]}`;
         if (md) data = dataISO(md[1]);

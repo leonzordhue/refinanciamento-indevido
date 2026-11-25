@@ -185,4 +185,38 @@ t("PDF: cabeçalho empilhado em 2 linhas (Data/Inclusão, Origem da/Exclusão)",
   assert.equal(c.origem, "nova"); assert.equal(c.parcela, 300); assert.equal(c.liberado, 12000);
 });
 
+t("PDF Meu INSS: cabeçalho partido (CONTRA/TO), células quebradas e data dd/mm/aa", () => {
+  // números fictícios; leiaute igual ao HISCON atual (células centradas na vertical, alturas diferentes)
+  const ws = [];
+  const W = (t, x, y, w = 24) => ws.push({ t, x, y, w, h: 6, p: 1 });
+  W("EMPRÉSTIMOS", 40, 40, 60); W("BANCÁRIOS", 105, 40, 50);
+  W("CONTRATOS", 40, 60, 50); W("ATIVOS", 95, 60, 30); W("E", 128, 60, 5); W("SUSPENSOS*", 136, 60, 50);
+  W("ORIGEM", 150, 78); W("COMPETÊNCIA", 225, 78, 60); W("VALOR", 380, 78); W("DATA", 520, 78);
+  W("DA", 155, 84, 10);
+  [["CONTRA", 30], ["SITUA", 120], ["AVERBA", 150], ["DATA", 190], ["INÍCIO DE", 222], ["FIM DE", 262], ["QTDE", 300], ["", 0]].forEach(([t, x]) => t && W(t, x, 90));
+  [["TO", 36], ["BANCO", 85], ["ÇÃO", 122], ["ÇÃO", 155], ["INCLUS", 190], ["DESCONT", 222], ["DESCONT", 262], ["PARCE", 300], ["PARCELA", 330], ["EMPRESTADO", 370], ["LIBERADO", 420], ["VALOR", 470], ["PRIMEIRO", 510], ["SUSPENS.", 550]].forEach(([t, x]) => W(t, x, 96));
+  [["ÃO", 195], ["O", 230], ["O", 270], ["LAS", 302], ["PAGO**", 470], ["DESCONTO", 510], ["BANCO", 552]].forEach(([t, x]) => W(t, x, 102));
+  // linha 1: refinanciamento (4 linhas de altura)
+  [["Averbaç", 150, 112], ["ão por", 150, 118], ["Refinan", 150, 124], ["ciament", 150, 130]].forEach(([t, x, y]) => W(t, x, y));
+  [["123456", 30, 118], ["7890", 34, 124], ["341 -", 85, 115], ["BANCO", 85, 121], ["ITAU SA", 85, 127], ["Ativo", 120, 121], ["05/02/2", 190, 118], ["6", 195, 124],
+   ["03/2026", 222, 121], ["02/2034", 262, 121], ["96", 302, 121], ["R$496,42", 330, 121], ["R$47.656,32", 370, 121], ["R$19.38", 470, 118], ["8,64", 474, 124], ["08/04/26", 510, 121]].forEach(([t, x, y]) => W(t, x, y));
+  W("o", 155, 136, 6);
+  // linha 2: banco em 5 linhas, resto numa só
+  [["626 -", 85, 144], ["BANCO", 85, 150], ["C6", 85, 156], ["CONSIG", 85, 162], ["NADO S", 85, 168], ["A", 90, 174]].forEach(([t, x, y]) => W(t, x, y));
+  [["901481", 30, 156], ["45584", 32, 162], ["Ativo", 120, 159], ["Averbaç", 150, 156], ["ão nova", 150, 162], ["03/09/2", 190, 156], ["5", 195, 162],
+   ["10/2025", 222, 159], ["09/2030", 262, 159], ["60", 302, 159], ["R$40,00", 330, 159], ["R$1.429,88", 370, 159], ["R$1.311,56", 420, 159]].forEach(([t, x, y]) => W(t, x, y));
+  // linha 3: começa logo abaixo do "A" do banco da linha 2
+  [["375324", 30, 186], ["514-5", 32, 192], ["623 -", 85, 183], ["BANCO", 85, 189], ["PAN S A", 85, 195], ["Ativo", 120, 189], ["Averbaç", 150, 186], ["ão nova", 150, 192],
+   ["11/07/2", 190, 186], ["3", 195, 192], ["08/2023", 222, 189], ["07/2030", 262, 189], ["84", 302, 189], ["R$30,93", 330, 189]].forEach(([t, x, y]) => W(t, x, y));
+  W("*Contratos", 30, 210, 50); W("que", 85, 210, 20); W("comprometem", 108, 210, 60);
+  const cs = M.lerHisconPalavras(ws).contratos;
+  assert.equal(cs.length, 3);
+  const [a, b, c] = cs;
+  assert.equal(a.contrato, "1234567890"); assert.equal(a.banco, "341"); assert.equal(a.origem, "refin");
+  assert.equal(a.inclusao, "2026-02-05"); assert.equal(a.inicio, "2026-03"); assert.equal(a.qtd, 96);
+  assert.equal(a.parcela, 496.42); assert.equal(a.emprestado, 47656.32); assert.equal(a.pago, 19388.64);
+  assert.equal(b.banco, "626"); assert.equal(b.origem, "nova"); assert.equal(b.liberado, 1311.56);
+  assert.equal(c.contrato, "375324514-5"); assert.equal(c.banco, "623"); assert.equal(c.inclusao, "2023-07-11");
+});
+
 console.log(`\n${ok} testes ok${process.exitCode ? " · HÁ FALHAS" : ""}`);
